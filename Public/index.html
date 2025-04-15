@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Live Song Requests</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    h1 { color: #444; }
+    ul { list-style: none; padding: 0; }
+    li { background: #f0f0f0; margin: 5px 0; padding: 10px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>🎶 小嗳直播间点歌</h1>
+  <ul id="requests"></ul>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const list = document.getElementById('requests');
+
+    socket.on('song_request', (data) => {
+      const li = document.createElement('li');
+      li.textContent = `${data.user}: ${data.song}`;
+      list.appendChild(li);
+    });
+  </script>
+</body>
+</html>
