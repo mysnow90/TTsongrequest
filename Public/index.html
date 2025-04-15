@@ -1,13 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
   <title>Live Song Requests</title>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    h1 { color: #444; }
-    ul { list-style: none; padding: 0; }
-    li { background: #f0f0f0; margin: 5px 0; padding: 10px; border-radius: 8px; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #fafafa;
+      color: #333;
+    }
+
+    h1 {
+      color: #444;
+      font-size: 28px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #f0f0f0;
+      margin: 5px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: background 0.3s;
+    }
+
+    li:hover {
+      background: #e6e6e6;
+    }
   </style>
 </head>
 <body>
@@ -21,8 +46,12 @@
 
     socket.on('song_request', (data) => {
       const li = document.createElement('li');
-      li.textContent = `${data.user}: ${data.song}`;
+      const time = new Date().toLocaleTimeString();
+      li.textContent = `[${time}] ${data.user}: ${data.song}`;
       list.appendChild(li);
+
+      // Scroll to bottom when new song is added
+      window.scrollTo(0, document.body.scrollHeight);
     });
   </script>
 </body>
