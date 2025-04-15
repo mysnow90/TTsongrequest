@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
 const { WebcastPushConnection } = require('tiktok-live-connector');
@@ -8,7 +9,7 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 const tiktokUsername = "naisi8866"; 
-app.use(express.static('public')); // Serves HTML from "public" folder
+app.use(express.static(path.join(__dirname, 'public')));
 
 const tiktokConnection = new WebcastPushConnection(tiktokUsername);
 
