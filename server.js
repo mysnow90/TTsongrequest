@@ -9,7 +9,14 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 const tiktokUsername = "naisi8866"; 
+
+// Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Define a route for the root path
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 const tiktokConnection = new WebcastPushConnection(tiktokUsername);
 
