@@ -18,26 +18,43 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-const tiktokConnection = new WebcastPushConnection(tiktokUsername);
+// Function to handle connection logic
+function connectToTikTok() {
+  const tiktokConnection = new WebcastPushConnection(tiktokUsername);
 
-// Connect to TikTok Live
-tiktokConnection.connect().then(state => {
+  tiktokConnection.connect().then(state => {
     console.log(`Connected to roomId: ${state.roomId}`);
-}).catch(err => {
+  }).catch(err => {
     console.error("Connection failed:", err);
-});
+    // Retry connection after 5 seconds if initial connection fails
+    setTimeout(connectToTikTok, 5000);
+  });
 
-tiktokConnection.on('chat', data => {
+  tiktokConnection.on('chat', data => {
     const comment = data.comment;
     const matches = comment.match(/#\[(.*?)\]/); // Matches #[Song Name]
 
     if (matches) {
-        const song = matches[1];
-        console.log(`Song Request: ${song}`);
-        io.emit('song_request', { user: data.nickname, song });
+      const song = matches[1];
+      console.log(`Song Request: ${song}`);
+      io.emit('song_request', { user: data.nickname, song });
     }
-});
+  });
+
+  tiktokConnection.on('disconnected', () => {
+    console.warn("Disconnected from TikTok Live. Attempting to reconnect in 5 seconds...");
+    // Retry connection after 5 seconds
+    setTimeout(connectToTikTok, 5000);
+  });
+
+  tiktokConnection.on('error', err => {
+    console.error("An error occurred:", err);
+  });
+}
+
+// Start the initial connection
+connectToTikTok();
 
 server.listen(3000, () => {
-    console.log('Server running on http://localhost:3000');
+  console.log('Server running on http://localhost:3000');
 });
