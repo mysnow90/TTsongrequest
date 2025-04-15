@@ -7,7 +7,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const tiktokUsername = "smngx__"; 
+const tiktokUsername = "naisi8866"; 
 app.use(express.static('public')); // Serves HTML from "public" folder
 
 const tiktokConnection = new WebcastPushConnection(tiktokUsername);
