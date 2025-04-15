@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>Live Song Requests</title>
+<link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #1e1e1e;
+      color: #f5f5f5;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    h1 {
+      color: #ffffff;
+      font-size: 28px;
+      text-align: center;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    li {
+      background: #2e2e2e;
+      margin: 5px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(255,255,255,0.05);
+      transition: background 0.3s;
+    }
+
+    li:hover {
+      background: #3a3a3a;
+    }
+
+    /* ❄️ Snow styles */
+    .snowflake {
+      position: fixed;
+      top: -10px;
+      color: white;
+      font-size: 1.2em;
+      animation: fall linear infinite;
+      opacity: 0.8;
+      z-index: 9999;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(100vh) rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎶 小嗳直播间点歌</h1>
+  <ul id="requests"></ul>
+
+  <!-- ❄️ Snow effect using JavaScript -->
+  <script>
+    function createSnowflake() {
+      const snowflake = document.createElement('div');
+      snowflake.classList.add('snowflake');
+      snowflake.textContent = '❄️';
+      snowflake.style.left = Math.random() * window.innerWidth + 'px';
+      snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+      snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+
+      document.body.appendChild(snowflake);
+
+      setTimeout(() => {
+        snowflake.remove();
+      }, 5000);
+    }
+
+    setInterval(createSnowflake, 200);
+  </script>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const list = document.getElementById('requests');
+
+    socket.on('song_request', (data) => {
+      const li = document.createElement('li');
+      const time = new Date().toLocaleTimeString();
+      li.textContent = `[${time}] ${data.user}: ${data.song}`;
+      list.appendChild(li);
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+  </script>
+<script src="script.js" defer></script>
+</body>
+</html>
