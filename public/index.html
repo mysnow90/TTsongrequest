@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Live Song Requests</title>
-<link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -55,13 +55,34 @@
       0% { transform: translateY(0) rotate(0deg); }
       100% { transform: translateY(100vh) rotate(360deg); }
     }
+
+    button {
+      background: #ff4b4b;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    button:hover {
+      background: #e63a3a;
+    }
+
   </style>
 </head>
 <body>
   <h1>🎶 小嗳直播间点歌</h1>
+
+  <div style="text-align:center;">
+    <button id="clearButton">🗑️ 清空列表</button>
+  </div>
+
   <ul id="requests"></ul>
 
-  <!-- ❄️ Snow effect using JavaScript -->
+  <!-- ❄️ Snow effect -->
   <script>
     function createSnowflake() {
       const snowflake = document.createElement('div');
@@ -70,14 +91,9 @@
       snowflake.style.left = Math.random() * window.innerWidth + 'px';
       snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
       snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
-
       document.body.appendChild(snowflake);
-
-      setTimeout(() => {
-        snowflake.remove();
-      }, 5000);
+      setTimeout(() => snowflake.remove(), 5000);
     }
-
     setInterval(createSnowflake, 200);
   </script>
 
@@ -85,15 +101,46 @@
   <script>
     const socket = io();
     const list = document.getElementById('requests');
+    const clearButton = document.getElementById('clearButton');
 
-    socket.on('song_request', (data) => {
+    function addRequestToList(request) {
       const li = document.createElement('li');
-      const time = new Date().toLocaleTimeString();
-      li.textContent = `[${time}] ${data.user}: ${data.song}`;
+      const time = request.time || new Date().toLocaleTimeString();
+      li.textContent = `[${time}] ${request.user}: ${request.song}`;
       list.appendChild(li);
       window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    socket.on('existing_song_requests', (requests) => {
+      requests.forEach(addRequestToList);
+    });
+
+    socket.on('song_request', (data) => {
+      addRequestToList(data);
+    });
+
+    socket.on('clear_song_requests', () => {
+      list.innerHTML = '';
+    });
+
+    clearButton.addEventListener('click', () => {
+      if (confirm('确定要清空点歌列表吗？')) {
+        fetch('/clear-requests', { method: 'POST' })
+          .then(res => res.json())
+          .then(result => {
+            if (result.success) {
+              list.innerHTML = '';
+              alert('点歌列表已清空！');
+            } else {
+              alert('清空失败，请检查服务器！');
+            }
+          })
+          .catch(err => {
+            console.error('Error:', err);
+            alert('网络错误，清空失败！');
+          });
+      }
     });
   </script>
-<script src="script.js" defer></script>
 </body>
 </html>
