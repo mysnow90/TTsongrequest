@@ -8,7 +8,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const tiktokUsername = "euniceaiii"; 
+const tiktokUsername = "euniceaiii";
 
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -32,12 +32,20 @@ function connectToTikTok() {
 
   tiktokConnection.on('chat', data => {
     const comment = data.comment;
-    const matches = comment.match(/#\[(.*?)\]/); // Matches #[Song Name]
+    const user = data.nickname;
+
+    // Emit the full comment to all clients
+    io.emit('chat_message', { user, message: comment });
+
+    // Match patterns like #SongName
+    const matches = comment.match(/#(\S+)/g);
 
     if (matches) {
-      const song = matches[1];
-      console.log(`Song Request: ${song}`);
-      io.emit('song_request', { user: data.nickname, song });
+      matches.forEach(match => {
+        const song = match.substring(1); // Remove the '#' character
+        console.log(`Song Request: ${song}`);
+        io.emit('song_request', { user, song });
+      });
     }
   });
 
