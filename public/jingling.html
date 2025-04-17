@@ -2,64 +2,17 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>小璇 直播间 点歌</title>
+  <title>静灵的点歌单</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #1e1e1e;
-      color: #f5f5f5;
-      text-align: center;
-      padding: 20px;
-    }
-
-    h1 {
-      color: #ffffff;
-      font-size: 28px;
-      margin-bottom: 30px;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    li {
-      background: #2e2e2e;
-      margin: 5px 0;
-      padding: 10px 15px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(255,255,255,0.05);
-      transition: background 0.3s;
-    }
-
-    li:hover {
-      background: #3a3a3a;
-    }
-
-    button {
-      background: #ff4b4b;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-      font-size: 16px;
-      margin-bottom: 20px;
-    }
-
-    button:hover {
-      background: #e63a3a;
-    }
+    /* Your existing styles here */
   </style>
 </head>
 <body>
-  <h1>🎶 精灵 直播间 点歌</h1>
+  <h1>🎶 静灵的点歌单</h1>
 
   <div style="text-align:center;">
-    <button id="clearButton">🗑️ 清空列表</button>
+    <button id="clearButton">🗑️ 清空静灵的点歌列表</button>
   </div>
 
   <ul id="requests"></ul>
@@ -70,7 +23,6 @@
     const list = document.getElementById('requests');
     const clearButton = document.getElementById('clearButton');
 
-    // Function to add song requests to the list
     function addRequestToList(request) {
       const li = document.createElement('li');
       const time = request.time || new Date().toLocaleTimeString();
@@ -79,25 +31,26 @@
       window.scrollTo(0, document.body.scrollHeight);
     }
 
-    // When existing song requests are sent from the server, display them
-    socket.on('existing_song_requests_2', (requests) => {
+    socket.on('existing_song_requests', (requests) => {
       requests.forEach(addRequestToList);
     });
 
-    // When a new song request is sent from the server, display it
-    socket.on('song_request_2', (data) => {
+    socket.on('song_request', (data) => {
       addRequestToList(data);
     });
 
-    // Handle the "Clear Song Requests" button click
+    socket.on('clear_song_requests', () => {
+      list.innerHTML = '';
+    });
+
     clearButton.addEventListener('click', () => {
-      if (confirm('确定要清空点歌列表吗？')) {
-        fetch('/clear-requests', { method: 'POST' })
+      if (confirm('确定要清空静灵的点歌列表吗？')) {
+        fetch('/clear-requests/jingling', { method: 'POST' })
           .then(res => res.json())
           .then(result => {
             if (result.success) {
               list.innerHTML = '';
-              alert('点歌列表已清空！');
+              alert('静灵的点歌列表已清空！');
             } else {
               alert('清空失败，请检查服务器！');
             }
