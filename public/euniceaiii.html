@@ -2,20 +2,100 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>小嗳的点歌单</title>
+  <title>小嗳 (euniceaiii) 的点歌单</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* Your existing styles here */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #1e1e1e;
+      color: #f5f5f5;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    h1 {
+      color: #ffffff;
+      font-size: 28px;
+      text-align: center;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    li {
+      background: #2e2e2e;
+      margin: 5px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(255,255,255,0.05);
+      transition: background 0.3s;
+    }
+
+    li:hover {
+      background: #3a3a3a;
+    }
+
+    /* Snowflake styles */
+    .snowflake {
+      position: fixed;
+      top: -10px;
+      color: white;
+      font-size: 1.2em;
+      animation: fall linear infinite;
+      opacity: 0.8;
+      z-index: 9999;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(100vh) rotate(360deg); }
+    }
+
+    /* Button styles */
+    button {
+      background: #ff4b4b;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    button:hover {
+      background: #e63a3a;
+    }
   </style>
 </head>
 <body>
   <h1>🎶 小嗳的点歌单</h1>
 
   <div style="text-align:center;">
-    <button id="clearButton">🗑️ 清空小嗳的点歌列表</button>
+    <button id="clearButton">🗑️ 清空列表</button>
   </div>
 
   <ul id="requests"></ul>
+
+  <!-- Snow effect -->
+  <script>
+    function createSnowflake() {
+      const snowflake = document.createElement('div');
+      snowflake.classList.add('snowflake');
+      snowflake.textContent = '❄️';
+      snowflake.style.left = Math.random() * window.innerWidth + 'px';
+      snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+      snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+      document.body.appendChild(snowflake);
+      setTimeout(() => snowflake.remove(), 5000);
+    }
+    setInterval(createSnowflake, 200);
+  </script>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
@@ -44,13 +124,13 @@
     });
 
     clearButton.addEventListener('click', () => {
-      if (confirm('确定要清空小嗳的点歌列表吗？')) {
-        fetch('/clear-requests/euniceaiii', { method: 'POST' })
+      if (confirm('确定要清空点歌列表吗？')) {
+        fetch('/clear-requests', { method: 'POST' })
           .then(res => res.json())
           .then(result => {
             if (result.success) {
               list.innerHTML = '';
-              alert('小嗳的点歌列表已清空！');
+              alert('点歌列表已清空！');
             } else {
               alert('清空失败，请检查服务器！');
             }
