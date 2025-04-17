@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>选择 TikToker's 点歌单</title>
+  <title>选择 TikToker</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body {
@@ -20,55 +20,54 @@
       text-align: center;
     }
 
-    .tiktoker-container {
+    .photo-container {
       display: flex;
-      justify-content: center; /* Center cards side by side */
-      gap: 20px; /* Space between the cards */
-      margin-top: 30px;
+      justify-content: center;
+      gap: 50px;
+      margin-top: 50px;
     }
 
-    .tiktoker-card {
-      text-align: center;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      overflow: hidden;
-      position: relative;
+    .photo {
       width: 300px;
       height: 300px;
-      transition: transform 0.3s ease;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      transition: filter 0.3s ease;
     }
 
-    .tiktoker-card img {
+    .photo img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
-    .tiktoker-card:hover {
-      transform: scale(1.05);
-      filter: brightness(1.1);
+    .photo:hover {
+      filter: blur(5px);
     }
 
-    .tiktoker-name {
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: #ffffff;
-      font-size: 18px;
-      font-weight: bold;
-      background-color: rgba(0, 0, 0, 0.6);
-      padding: 5px;
-      border-radius: 5px;
+    .photo:hover ~ .photo {
+      filter: blur(5px);
     }
 
-    /* Animation for the blurred effect */
-    .tiktoker-card:hover ~ .tiktoker-card {
-      filter: blur(4px);
-    }
-
-    .tiktoker-card:hover {
+    .photo-container:hover .photo {
       filter: none;
+    }
+
+    button {
+      background: #ff4b4b;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    button:hover {
+      background: #e63a3a;
     }
 
     /* Snowflake styles */
@@ -86,25 +85,17 @@
       0% { transform: translateY(0) rotate(0deg); }
       100% { transform: translateY(100vh) rotate(360deg); }
     }
-
   </style>
 </head>
 <body>
-  <h1>🎶 选择 TikToker's 点歌单</h1>
+  <h1>🎶 选择 TikToker</h1>
 
-  <div class="tiktoker-container">
-    <div class="tiktoker-card">
-      <a href="/euniceaiii.html">
-        <img src="/img/euniceaiii.jpeg" alt="小嗳的照片">
-        <div class="tiktoker-name">小嗳按这边</div>
-      </a>
+  <div class="photo-container">
+    <div class="photo" id="euniceaiii">
+      <img src="img/euniceaiii.jpeg" alt="euniceaiii">
     </div>
-
-    <div class="tiktoker-card">
-      <a href="/jingling.html">
-        <img src="/img/jingling.jpeg" alt="静灵的照片">
-        <div class="tiktoker-name">精灵按这边</div>
-      </a>
+    <div class="photo" id="jingling">
+      <img src="img/jingling.jpeg" alt="jingling">
     </div>
   </div>
 
@@ -123,5 +114,17 @@
     setInterval(createSnowflake, 200);
   </script>
 
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    document.getElementById('euniceaiii').addEventListener('click', () => {
+      window.location.href = '/euniceaiii.html';
+    });
+
+    document.getElementById('jingling').addEventListener('click', () => {
+      window.location.href = '/jingling.html';
+    });
+  </script>
 </body>
 </html>
