@@ -1,72 +1,45 @@
-/* General Styles */
+/* Add any additional styles for your landing page */
 body {
-  font-family: 'Arial', sans-serif;
-  background-color: #333;
-  color: #fff;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+  font-family: Arial, sans-serif;
+  background-color: #1e1e1e;
+  color: #f5f5f5;
 }
 
 h1 {
-  font-size: 2.5rem;
-  margin-bottom: 20px;
+  color: #ffffff;
+  font-size: 28px;
   text-align: center;
+  margin-top: 50px;
 }
 
-ul {
-  list-style: none;
-  padding: 0;
-  width: 80%;
-  max-width: 600px;
-  margin: 0;
-  overflow-y: auto;
-  max-height: 60vh;
-  border-radius: 8px;
-  background-color: rgba(255, 255, 255, 0.1);
+.tiktoker-frame {
+  display: inline-block;
+  margin: 20px;
+  position: relative;
+  width: 300px;
+  height: 300px;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
-li {
-  background-color: rgba(255, 255, 255, 0.2);
-  margin: 5px 0;
-  padding: 10px;
-  border-radius: 8px;
-  transition: background-color 0.3s;
-}
-
-li:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-}
-
-/* Snow Effect */
-.snow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 999;
+.tiktoker-photo {
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  opacity: 0.5;
+  object-fit: cover;
 }
 
-.snowflake {
-  position: absolute;
-  color: #fff;
-  font-size: 1.5rem;
-  user-select: none;
-  pointer-events: none;
-  animation: fall linear infinite;
+.choose-button {
+  font-size: 20px;
+  background-color: #ff4b4b;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 20px;
 }
 
-@keyframes fall {
-  to {
-    transform: translateY(100vh);
-  }
+.choose-button:hover {
+  background-color: #e63a3a;
 }
