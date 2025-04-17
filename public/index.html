@@ -22,7 +22,8 @@
 
     .tiktoker-container {
       display: flex;
-      justify-content: space-around;
+      justify-content: center; /* Center cards side by side */
+      gap: 20px; /* Space between the cards */
       margin-top: 30px;
     }
 
@@ -75,14 +76,14 @@
   <h1>🎶 选择 TikToker's 点歌单</h1>
 
   <div class="tiktoker-container">
-    <div class="tiktoker-card" onmouseover="this.style.filter='blur(4px)'" onmouseout="this.style.filter='none'">
+    <div class="tiktoker-card">
       <a href="/euniceaiii.html">
         <img src="/img/euniceaiii.jpeg" alt="小嗳的照片">
         <div class="tiktoker-name">小嗳 (euniceaiii)</div>
       </a>
     </div>
 
-    <div class="tiktoker-card" onmouseover="this.style.filter='blur(4px)'" onmouseout="this.style.filter='none'">
+    <div class="tiktoker-card">
       <a href="/jingling.html">
         <img src="/img/jingling.jpeg" alt="精灵的照片">
         <div class="tiktoker-name">精灵 (jingling)</div>
