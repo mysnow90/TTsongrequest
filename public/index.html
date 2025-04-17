@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>Live Song Requests</title>
+  <title>选择直播间</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body {
@@ -10,107 +10,77 @@
       padding: 20px;
       background-color: #1e1e1e;
       color: #f5f5f5;
+      text-align: center;
       overflow-x: hidden;
-      position: relative;
     }
 
     h1 {
       color: #ffffff;
       font-size: 28px;
-      text-align: center;
+      margin-bottom: 30px;
     }
 
-    ul {
-      list-style: none;
-      padding: 0;
-      max-width: 600px;
-      margin: 0 auto;
+    .tiktoker-frame {
+      display: inline-block;
+      margin: 20px;
+      position: relative;
+      width: 300px;
+      height: 300px;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, filter 0.3s ease;
     }
 
-    li {
-      background: #2e2e2e;
-      margin: 5px 0;
-      padding: 10px 15px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(255,255,255,0.05);
-      transition: background 0.3s;
-      word-break: break-word;
+    .tiktoker-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: filter 0.3s ease;
     }
 
-    li:hover {
-      background: #3a3a3a;
+    .blurred {
+      filter: blur(5px);
     }
 
-    .timeago {
-      color: #888;
-      font-size: 0.8em;
-      margin-left: 10px;
+    .tiktoker-frame:hover .tiktoker-photo {
+      transform: scale(1.05);
+      filter: brightness(1.2);
     }
 
-    button {
-      background: #ff4b4b;
-      border: none;
+    .tiktoker-frame:hover ~ .tiktoker-frame .tiktoker-photo {
+      filter: blur(5px); /* Blurs other tiktoker's photo */
+    }
+
+    .choose-button {
+      font-size: 20px;
+      background-color: #ff4b4b;
+      color: white;
       padding: 10px 20px;
+      border: none;
       border-radius: 8px;
-      color: white;
       cursor: pointer;
-      font-size: 16px;
-      margin-bottom: 20px;
+      margin-top: 20px;
     }
 
-    button:hover {
-      background: #e63a3a;
+    .choose-button:hover {
+      background-color: #e63a3a;
     }
 
-    /* ❄️ Snow styles */
-    .snowflake {
-      position: fixed;
-      top: -10px;
-      color: white;
-      font-size: 1.2em;
-      animation: fall linear infinite;
-      opacity: 0.8;
-      z-index: 9999;
-    }
-
-    @keyframes fall {
-      0% { transform: translateY(0) rotate(0deg); }
-      100% { transform: translateY(100vh) rotate(360deg); }
-    }
   </style>
 </head>
 <body>
-  <h1>🎶 小嗳直播间点歌</h1>
+  <h1>🎶 选择直播间</h1>
 
-  <div style="text-align:center;">
-    <button id="clearButton">🗑️ 清空列表</button>
+  <div class="tiktoker-frame">
+    <img src="https://path/to/euniceaiii-photo.jpg" alt="小嗳's Photo" class="tiktoker-photo">
+    <a href="/euniceaiii" class="choose-button">进入 小嗳 直播间</a>
   </div>
 
-  <ul id="requests"></ul>
+  <div class="tiktoker-frame">
+    <img src="https://path/to/nxuan0702-photo.jpg" alt="小璇's Photo" class="tiktoker-photo">
+    <a href="/nxuan0702" class="choose-button">进入 小璇 直播间</a>
+  </div>
 
-  <!-- ❄️ Snow effect -->
-  <script>
-    function createSnowflake() {
-      const snowflake = document.createElement('div');
-      snowflake.classList.add('snowflake');
-      snowflake.textContent = '❄️';
-      snowflake.style.left = Math.random() * window.innerWidth + 'px';
-      snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
-      snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
-      document.body.appendChild(snowflake);
-      setTimeout(() => snowflake.remove(), 5000);
-    }
-    setInterval(createSnowflake, 200);
-  </script>
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
-    const list = document.getElementById('requests');
-    const clearButton = document.getElementById('clearButton');
-
-    function addRequestToList(request) {
-      const li = document.createElement('li');
-      li.dataset.timestamp = request.timestamp || Date.now();
-      li.innerHTML = `[${request.time}] <strong>${request.user}</strong>: ${request.song}
-                      <
+</body>
+</html>
