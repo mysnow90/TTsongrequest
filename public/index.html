@@ -34,26 +34,17 @@
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(255,255,255,0.05);
       transition: background 0.3s;
+      word-break: break-word;
     }
 
     li:hover {
       background: #3a3a3a;
     }
 
-    /* ❄️ Snow styles */
-    .snowflake {
-      position: fixed;
-      top: -10px;
-      color: white;
-      font-size: 1.2em;
-      animation: fall linear infinite;
-      opacity: 0.8;
-      z-index: 9999;
-    }
-
-    @keyframes fall {
-      0% { transform: translateY(0) rotate(0deg); }
-      100% { transform: translateY(100vh) rotate(360deg); }
+    .timeago {
+      color: #888;
+      font-size: 0.8em;
+      margin-left: 10px;
     }
 
     button {
@@ -71,6 +62,21 @@
       background: #e63a3a;
     }
 
+    /* ❄️ Snow styles */
+    .snowflake {
+      position: fixed;
+      top: -10px;
+      color: white;
+      font-size: 1.2em;
+      animation: fall linear infinite;
+      opacity: 0.8;
+      z-index: 9999;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(100vh) rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -105,42 +111,6 @@
 
     function addRequestToList(request) {
       const li = document.createElement('li');
-      const time = request.time || new Date().toLocaleTimeString();
-      li.textContent = `[${time}] ${request.user}: ${request.song}`;
-      list.appendChild(li);
-      window.scrollTo(0, document.body.scrollHeight);
-    }
-
-    socket.on('existing_song_requests', (requests) => {
-      requests.forEach(addRequestToList);
-    });
-
-    socket.on('song_request', (data) => {
-      addRequestToList(data);
-    });
-
-    socket.on('clear_song_requests', () => {
-      list.innerHTML = '';
-    });
-
-    clearButton.addEventListener('click', () => {
-      if (confirm('确定要清空点歌列表吗？')) {
-        fetch('/clear-requests', { method: 'POST' })
-          .then(res => res.json())
-          .then(result => {
-            if (result.success) {
-              list.innerHTML = '';
-              alert('点歌列表已清空！');
-            } else {
-              alert('清空失败，请检查服务器！');
-            }
-          })
-          .catch(err => {
-            console.error('Error:', err);
-            alert('网络错误，清空失败！');
-          });
-      }
-    });
-  </script>
-</body>
-</html>
+      li.dataset.timestamp = request.timestamp || Date.now();
+      li.innerHTML = `[${request.time}] <strong>${request.user}</strong>: ${request.song}
+                      <
