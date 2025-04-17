@@ -9,15 +9,15 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const tiktokUsername = "euniceaiii";
+const tiktokUsername = "euniceaiii"; // Your TikTok username
 const songRequestsFile = path.join(__dirname, 'songRequests.json');
 
-// Ensure JSON file exists
+// Ensure the JSON file exists
 if (!fs.existsSync(songRequestsFile)) {
   fs.writeFileSync(songRequestsFile, JSON.stringify([]));
 }
 
-// Middleware to serve static files
+// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve the homepage
@@ -25,7 +25,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Handle clearing the song request list
+// Clear song request list
 app.post('/clear-requests', (req, res) => {
   fs.writeFile(songRequestsFile, JSON.stringify([], null, 2), (err) => {
     if (err) {
@@ -37,7 +37,7 @@ app.post('/clear-requests', (req, res) => {
   });
 });
 
-// Handle WebSocket connections
+// Send existing song requests to new connections
 io.on('connection', socket => {
   fs.readFile(songRequestsFile, 'utf8', (err, data) => {
     if (!err) {
@@ -51,6 +51,7 @@ io.on('connection', socket => {
   });
 });
 
+// Connect to TikTok Live
 function connectToTikTok() {
   const tiktokConnection = new WebcastPushConnection(tiktokUsername);
 
@@ -67,14 +68,29 @@ function connectToTikTok() {
 
     io.emit('chat_message', { user, message: comment });
 
-    const matches = comment.match(/#(\S+)/g);
+    // Match # + optional spaces + song name
+    const matches = comment.match(/#\s*(.+)/g);
     if (matches) {
       matches.forEach(match => {
-        const song = match.substring(1);
+        const song = match.replace(/^#\s*/, '').trim(); // remove # and spaces
+
+        const now = new Date();
+        const timeString = now.toLocaleString('en-US', {
+          timeZone: 'Asia/Singapore',
+          hour12: false,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+
         const newRequest = { 
           user, 
           song, 
-          time: new Date().toLocaleTimeString() 
+          time: timeString, 
+          timestamp: now.getTime() // <-- Save raw timestamp for "time ago" 
         };
         console.log(`Song Request: ${song}`);
 
