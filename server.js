@@ -89,4 +89,78 @@ io.on('connection', socket => {
 function getMalaysiaTimeString() {
   const now = new Date();
   const malaysiaTime = new Date(now.getTime() + (8 * 60 * 60 * 1000)); // +8 hours
-  return malaysiaTime.toISOString().
+  return malaysiaTime.toISOString().replace('T', ' ').substring(0, 19);
+}
+
+// Connect to TikTok live
+function connectToTikTok(username, file) {
+  const tiktokConnection = new WebcastPushConnection(username);
+
+  tiktokConnection.connect().then(state => {
+    console.log(`Connected to roomId: ${state.roomId}`);
+  }).catch(err => {
+    console.error("Connection failed:", err);
+    setTimeout(() => connectToTikTok(username, file), 5000);
+  });
+
+  tiktokConnection.on('chat', data => {
+    const comment = data.comment;
+    const user = data.nickname;
+
+    io.emit('chat_message', { user, message: comment });
+
+    // FIXED: capture everything after # including spaces
+    const matches = comment.match(/#\s*(.+)/g);
+
+    if (matches) {
+      matches.forEach(match => {
+        const song = match.replace(/^#\s*/, ''); // remove leading # and spaces
+
+        const newRequest = {
+          user,
+          song,
+          time: getMalaysiaTimeString()
+        };
+        console.log(`[${username}] Song Request: ${song}`);
+
+        fs.readFile(file, 'utf8', (err, fileData) => {
+          let songRequests = [];
+          if (!err) {
+            try {
+              songRequests = JSON.parse(fileData);
+            } catch (parseErr) {
+              console.error('Error parsing file:', parseErr);
+            }
+          }
+
+          songRequests.push(newRequest);
+
+          fs.writeFile(file, JSON.stringify(songRequests, null, 2), writeErr => {
+            if (writeErr) {
+              console.error('Error writing to file:', writeErr);
+            }
+          });
+        });
+
+        io.emit('song_request', newRequest);
+      });
+    }
+  });
+
+  tiktokConnection.on('disconnected', () => {
+    console.warn("Disconnected from TikTok Live. Reconnecting in 5s...");
+    setTimeout(() => connectToTikTok(username, file), 5000);
+  });
+
+  tiktokConnection.on('error', err => {
+    console.error("Error:", err);
+  });
+}
+
+// Connect both TikTokers
+connectToTikTok(tiktokUsername1, songRequestsFile1);
+connectToTikTok(tiktokUsername2, songRequestsFile2);
+
+server.listen(3000, () => {
+  console.log('Server running on http://localhost:3000');
+});
