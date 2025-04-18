@@ -80,4 +80,67 @@
     const snowflake = document.createElement('div');
     snowflake.classList.add('snowflake');
     snowflake.textContent = '❄️';
-    snowflake.style.left = Math.random() * window.innerWidth + 'px*
+    snowflake.style.left = Math.random() * window.innerWidth + 'px';
+    snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+    snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+    document.body.appendChild(snowflake);
+    setTimeout(() => snowflake.remove(), 5000);
+  }
+  setInterval(createSnowflake, 200);
+</script>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  const list = document.getElementById('requests');
+  const clearButton = document.getElementById('clearButton');
+
+  function addRequestToList(request) {
+    const li = document.createElement('li');
+    const time = request.time || new Date().toLocaleTimeString();
+    li.textContent = `[${time}] ${request.user}: ${request.song}`;
+    list.appendChild(li);
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+
+  // 请求已有列表
+  socket.emit('request_existing', 'nxuan0702');
+
+  // 接收初始化列表
+  socket.on('existing_song_requests_2', (requests) => {
+    requests.forEach(addRequestToList);
+  });
+
+  // 接收新的实时请求
+  socket.on('song_request_nxuan0702', (data) => {
+    addRequestToList(data);
+  });
+
+  // 监听清空
+  socket.on('clear_song_requests_nxuan0702', () => {
+    list.innerHTML = '';
+  });
+
+  // 清空按钮
+  clearButton.addEventListener('click', () => {
+    if (confirm('确定要清空点歌列表吗？')) {
+      fetch('/clear-requests-nxuan0702', { method: 'POST' })
+        .then(res => res.json())
+        .then(result => {
+          if (result.success) {
+            list.innerHTML = '';
+            alert('点歌列表已清空！');
+          } else {
+            alert('清空失败，请检查服务器！');
+          }
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          alert('网络错误，清空失败！');
+        });
+    }
+  });
+</script>
+
+</body>
+</html>
