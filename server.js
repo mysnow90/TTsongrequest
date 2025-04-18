@@ -43,27 +43,31 @@ app.get('/nxuan0702', (req, res) => {
 
 // Handle WebSocket connections
 io.on('connection', socket => {
-  // For euniceaiii
-  fs.readFile(songRequestsFile1, 'utf8', (err, data) => {
-    if (!err) {
-      try {
-        const songRequests = JSON.parse(data);
-        socket.emit('existing_song_requests', songRequests);
-      } catch (parseError) {
-        console.error("Error parsing songRequests1.json:", parseError);
-      }
-    }
-  });
+  console.log('A user connected.');
 
-  // For nxuan0702
-  fs.readFile(songRequestsFile2, 'utf8', (err, data) => {
-    if (!err) {
-      try {
-        const songRequests = JSON.parse(data);
-        socket.emit('existing_song_requests_2', songRequests);
-      } catch (parseError) {
-        console.error("Error parsing songRequests2.json:", parseError);
-      }
+  socket.on('request_existing', (who) => {
+    if (who === 'euniceaiii') {
+      fs.readFile(songRequestsFile1, 'utf8', (err, data) => {
+        if (!err) {
+          try {
+            const songRequests = JSON.parse(data);
+            socket.emit('existing_song_requests', songRequests);
+          } catch (parseError) {
+            console.error("Error parsing songRequests1.json:", parseError);
+          }
+        }
+      });
+    } else if (who === 'nxuan0702') {
+      fs.readFile(songRequestsFile2, 'utf8', (err, data) => {
+        if (!err) {
+          try {
+            const songRequests = JSON.parse(data);
+            socket.emit('existing_song_requests_2', songRequests);
+          } catch (parseError) {
+            console.error("Error parsing songRequests2.json:", parseError);
+          }
+        }
+      });
     }
   });
 });
@@ -133,9 +137,9 @@ function connectToTikTok(username, file, socketEventName) {
   });
 }
 
-// Connect both TikTokers
-connectToTikTok(tiktokUsername1, songRequestsFile1, 'song_request');
-connectToTikTok(tiktokUsername2, songRequestsFile2, 'song_request_2');
+// Connect both TikTokers separately
+connectToTikTok(tiktokUsername1, songRequestsFile1, 'song_request_euniceaiii');
+connectToTikTok(tiktokUsername2, songRequestsFile2, 'song_request_nxuan0702');
 
 // Start server
 server.listen(3000, () => {

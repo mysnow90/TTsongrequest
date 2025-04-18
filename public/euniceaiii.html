@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>小嗳 (euniceaiii) 的点歌单</title>
+  <title>小嗳直播间点歌</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body {
@@ -13,20 +13,17 @@
       overflow-x: hidden;
       position: relative;
     }
-
     h1 {
       color: #ffffff;
       font-size: 28px;
       text-align: center;
     }
-
     ul {
       list-style: none;
       padding: 0;
       max-width: 600px;
       margin: 0 auto;
     }
-
     li {
       background: #2e2e2e;
       margin: 5px 0;
@@ -35,28 +32,9 @@
       box-shadow: 0 1px 3px rgba(255,255,255,0.05);
       transition: background 0.3s;
     }
-
     li:hover {
       background: #3a3a3a;
     }
-
-    /* Snowflake styles */
-    .snowflake {
-      position: fixed;
-      top: -10px;
-      color: white;
-      font-size: 1.2em;
-      animation: fall linear infinite;
-      opacity: 0.8;
-      z-index: 9999;
-    }
-
-    @keyframes fall {
-      0% { transform: translateY(0) rotate(0deg); }
-      100% { transform: translateY(100vh) rotate(360deg); }
-    }
-
-    /* Button styles */
     button {
       background: #ff4b4b;
       border: none;
@@ -67,80 +45,97 @@
       font-size: 16px;
       margin-bottom: 20px;
     }
-
     button:hover {
       background: #e63a3a;
+    }
+    /* ❄️ Snow effect */
+    .snowflake {
+      position: fixed;
+      top: -10px;
+      color: white;
+      font-size: 1.2em;
+      animation: fall linear infinite;
+      opacity: 0.8;
+      z-index: 9999;
+    }
+    @keyframes fall {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(100vh) rotate(360deg); }
     }
   </style>
 </head>
 <body>
-  <h1>🎶 小嗳的点歌单</h1>
 
-  <div style="text-align:center;">
-    <button id="clearButton">🗑️ 清空列表</button>
-  </div>
+<h1>🎶 小嗳直播间点歌</h1>
 
-  <ul id="requests"></ul>
+<div style="text-align:center;">
+  <button id="clearButton">🗑️ 清空列表</button>
+</div>
 
-  <!-- Snow effect -->
-  <script>
-    function createSnowflake() {
-      const snowflake = document.createElement('div');
-      snowflake.classList.add('snowflake');
-      snowflake.textContent = '❄️';
-      snowflake.style.left = Math.random() * window.innerWidth + 'px';
-      snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
-      snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
-      document.body.appendChild(snowflake);
-      setTimeout(() => snowflake.remove(), 5000);
-    }
-    setInterval(createSnowflake, 200);
-  </script>
+<ul id="requests"></ul>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
-    const list = document.getElementById('requests');
-    const clearButton = document.getElementById('clearButton');
+<!-- ❄️ Snow effect -->
+<script>
+  function createSnowflake() {
+    const snowflake = document.createElement('div');
+    snowflake.classList.add('snowflake');
+    snowflake.textContent = '❄️';
+    snowflake.style.left = Math.random() * window.innerWidth + 'px';
+    snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+    snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+    document.body.appendChild(snowflake);
+    setTimeout(() => snowflake.remove(), 5000);
+  }
+  setInterval(createSnowflake, 200);
+</script>
 
-    function addRequestToList(request) {
-      const li = document.createElement('li');
-      const time = request.time ?? '';
-      li.textContent = `[${time}] ${request.user}: ${request.song}`;
-      list.appendChild(li);
-      window.scrollTo(0, document.body.scrollHeight);
-    }
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  const list = document.getElementById('requests');
+  const clearButton = document.getElementById('clearButton');
 
-    socket.on('existing_song_requests', (requests) => {
-      requests.forEach(addRequestToList);
-    });
+  function addRequestToList(request) {
+    const li = document.createElement('li');
+    const time = request.time || new Date().toLocaleTimeString();
+    li.textContent = `[${time}] ${request.user}: ${request.song}`;
+    list.appendChild(li);
+    window.scrollTo(0, document.body.scrollHeight);
+  }
 
-    socket.on('song_request', (data) => {
+  socket.on('existing_song_requests', (requests) => {
+    requests.forEach(addRequestToList);
+  });
+
+  socket.on('song_request', (data) => {
+    if (data.from === 'euniceaiii') {
       addRequestToList(data);
-    });
+    }
+  });
 
-    socket.on('clear_song_requests', () => {
-      list.innerHTML = '';
-    });
+  socket.on('clear_song_requests_euniceaiii', () => {
+    list.innerHTML = '';
+  });
 
-    clearButton.addEventListener('click', () => {
-      if (confirm('确定要清空点歌列表吗？')) {
-        fetch('/clear-requests', { method: 'POST' })
-          .then(res => res.json())
-          .then(result => {
-            if (result.success) {
-              list.innerHTML = '';
-              alert('点歌列表已清空！');
-            } else {
-              alert('清空失败，请检查服务器！');
-            }
-          })
-          .catch(err => {
-            console.error('Error:', err);
-            alert('网络错误，清空失败！');
-          });
-      }
-    });
-  </script>
+  clearButton.addEventListener('click', () => {
+    if (confirm('确定要清空点歌列表吗？')) {
+      fetch('/clear-requests-euniceaiii', { method: 'POST' })
+        .then(res => res.json())
+        .then(result => {
+          if (result.success) {
+            list.innerHTML = '';
+            alert('点歌列表已清空！');
+          } else {
+            alert('清空失败，请检查服务器！');
+          }
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          alert('网络错误，清空失败！');
+        });
+    }
+  });
+</script>
+
 </body>
 </html>
