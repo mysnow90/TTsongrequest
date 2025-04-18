@@ -11,7 +11,7 @@ const io = new Server(server);
 
 // TikTok usernames
 const tiktokUsername1 = "euniceaiii";
-const tiktokUsername2 = "nxuan0702";
+const tiktokUsername2 = "n.xuan0702";
 
 // File paths for each TikToker's song requests
 const songRequestsFile1 = path.join(__dirname, 'songRequests1.json');
