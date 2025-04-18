@@ -28,12 +28,11 @@ if (!fs.existsSync(songRequestsFile2)) {
 // Middleware to serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Serve the homepage
+// Routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Serve page for each TikToker
 app.get('/euniceaiii', (req, res) => {
   res.sendFile(path.join(__dirname, 'euniceaiii.html'));
 });
@@ -42,26 +41,9 @@ app.get('/nxuan0702', (req, res) => {
   res.sendFile(path.join(__dirname, 'nxuan0702.html'));
 });
 
-// Handle clearing the song request lists
-app.post('/clear-requests', (req, res) => {
-  fs.writeFile(songRequestsFile1, JSON.stringify([], null, 2), (err) => {
-    if (err) {
-      console.error('Error clearing songRequests1.json:', err);
-      return res.status(500).json({ success: false, message: 'Failed to clear song requests.' });
-    }
-    fs.writeFile(songRequestsFile2, JSON.stringify([], null, 2), (err2) => {
-      if (err2) {
-        console.error('Error clearing songRequests2.json:', err2);
-        return res.status(500).json({ success: false, message: 'Failed to clear song requests 2.' });
-      }
-      io.emit('clear_song_requests');
-      res.json({ success: true });
-    });
-  });
-});
-
 // Handle WebSocket connections
 io.on('connection', socket => {
+  // For euniceaiii
   fs.readFile(songRequestsFile1, 'utf8', (err, data) => {
     if (!err) {
       try {
@@ -73,6 +55,7 @@ io.on('connection', socket => {
     }
   });
 
+  // For nxuan0702
   fs.readFile(songRequestsFile2, 'utf8', (err, data) => {
     if (!err) {
       try {
@@ -85,22 +68,15 @@ io.on('connection', socket => {
   });
 });
 
-// Helper: get Malaysia Time
-function getMalaysiaTimeString() {
-  const now = new Date();
-  const malaysiaTime = new Date(now.getTime() + (8 * 60 * 60 * 1000)); // +8 hours
-  return malaysiaTime.toISOString().replace('T', ' ').substring(0, 19);
-}
-
-// Connect to TikTok live
-function connectToTikTok(username, file) {
+// Function to connect to TikTok Live
+function connectToTikTok(username, file, socketEventName) {
   const tiktokConnection = new WebcastPushConnection(username);
 
   tiktokConnection.connect().then(state => {
-    console.log(`Connected to roomId: ${state.roomId}`);
+    console.log(`Connected to roomId: ${state.roomId} (${username})`);
   }).catch(err => {
-    console.error("Connection failed:", err);
-    setTimeout(() => connectToTikTok(username, file), 5000);
+    console.error(`Connection failed for ${username}:`, err);
+    setTimeout(() => connectToTikTok(username, file, socketEventName), 5000);
   });
 
   tiktokConnection.on('chat', data => {
@@ -109,18 +85,18 @@ function connectToTikTok(username, file) {
 
     io.emit('chat_message', { user, message: comment });
 
-    // FIXED: capture everything after # including spaces
-    const matches = comment.match(/#\s*(.+)/g);
-
+    // Match #songname or ＃songname including space after
+    const matches = comment.match(/[＃#][^＃#]+/g);
     if (matches) {
       matches.forEach(match => {
-        const song = match.replace(/^#\s*/, ''); // remove leading # and spaces
+        const song = match.substring(1).trim(); // remove # and trim
 
         const newRequest = {
           user,
           song,
-          time: getMalaysiaTimeString()
+          time: new Date().toLocaleString('en-US', { timeZone: 'Asia/Kuala_Lumpur', hour12: false }).replace(',', '')
         };
+
         console.log(`[${username}] Song Request: ${song}`);
 
         fs.readFile(file, 'utf8', (err, fileData) => {
@@ -142,25 +118,26 @@ function connectToTikTok(username, file) {
           });
         });
 
-        io.emit('song_request', newRequest);
+        io.emit(socketEventName, newRequest);
       });
     }
   });
 
   tiktokConnection.on('disconnected', () => {
-    console.warn("Disconnected from TikTok Live. Reconnecting in 5s...");
-    setTimeout(() => connectToTikTok(username, file), 5000);
+    console.warn(`Disconnected from ${username}. Reconnecting in 5s...`);
+    setTimeout(() => connectToTikTok(username, file, socketEventName), 5000);
   });
 
   tiktokConnection.on('error', err => {
-    console.error("Error:", err);
+    console.error(`Error from ${username}:`, err);
   });
 }
 
 // Connect both TikTokers
-connectToTikTok(tiktokUsername1, songRequestsFile1);
-connectToTikTok(tiktokUsername2, songRequestsFile2);
+connectToTikTok(tiktokUsername1, songRequestsFile1, 'song_request');
+connectToTikTok(tiktokUsername2, songRequestsFile2, 'song_request_2');
 
+// Start server
 server.listen(3000, () => {
-  console.log('Server running on http://localhost:3000');
+  console.log('Server running at http://localhost:3000');
 });
