@@ -103,16 +103,19 @@
     window.scrollTo(0, document.body.scrollHeight);
   }
 
+  // Request existing song list after connection
+  socket.emit('request_existing', 'euniceaiii');
+
   socket.on('existing_song_requests', (requests) => {
     requests.forEach(addRequestToList);
   });
 
-  socket.on('song_request', (data) => {
-    if (data.from === 'euniceaiii') {
-      addRequestToList(data);
-    }
+  // Listen for live new song requests only for 小嗳
+  socket.on('song_request_euniceaiii', (data) => {
+    addRequestToList(data);
   });
 
+  // Handle clearing list
   socket.on('clear_song_requests_euniceaiii', () => {
     list.innerHTML = '';
   });
