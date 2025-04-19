@@ -12,18 +12,29 @@
       color: #f5f5f5;
       overflow-x: hidden;
       position: relative;
+      display: flex;
+      justify-content: space-between;
     }
+
     h1 {
       color: #ffffff;
       font-size: 28px;
       text-align: center;
+      width: 100%;
     }
+
+    .left-section, .center-section, .right-section {
+      flex: 1;
+      margin: 10px;
+    }
+
     ul {
       list-style: none;
       padding: 0;
       max-width: 600px;
       margin: 0 auto;
     }
+
     li {
       background: #2e2e2e;
       margin: 5px 0;
@@ -32,9 +43,11 @@
       box-shadow: 0 1px 3px rgba(255,255,255,0.05);
       transition: background 0.3s;
     }
+
     li:hover {
       background: #3a3a3a;
     }
+
     button {
       background: #ff4b4b;
       border: none;
@@ -45,9 +58,42 @@
       font-size: 16px;
       margin-bottom: 20px;
     }
+
     button:hover {
       background: #e63a3a;
     }
+
+    /* 礼物动画 */
+    .gift {
+      position: absolute;
+      font-size: 2em;
+      color: #FFD700;
+      animation: giftAnimation 1.5s linear;
+      z-index: 999;
+    }
+
+    @keyframes giftAnimation {
+      0% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px);
+        opacity: 0;
+      }
+    }
+
+    /* 排名动画 */
+    .ranking {
+      font-size: 24px;
+      color: #FFD700;
+      font-weight: bold;
+      transition: transform 0.5s ease-in-out;
+    }
+    .rank-up {
+      transform: translateY(-20px);
+    }
+
     /* ❄️ Snow effect */
     .snowflake {
       position: fixed;
@@ -58,6 +104,7 @@
       opacity: 0.8;
       z-index: 9999;
     }
+
     @keyframes fall {
       0% { transform: translateY(0) rotate(0deg); }
       100% { transform: translateY(100vh) rotate(360deg); }
@@ -68,14 +115,26 @@
 
 <h1>🎶 精灵直播间点歌</h1>
 
-<div style="text-align:center;">
-  <button id="clearButton">🗑️ 清空列表</button>
+<div class="left-section">
+  <h2>🎁 礼物实时</h2>
+  <div id="gift-area"></div>
+  <button id="clearGiftsButton">🗑️ 清空礼物</button>
 </div>
 
-<ul id="requests"></ul>
+<div class="center-section">
+  <h2>🎵 点歌列表</h2>
+  <button id="clearSongListButton">🗑️ 清空列表</button>
+  <ul id="requests"></ul>
+</div>
 
-<!-- ❄️ Snow effect -->
+<div class="right-section">
+  <h2>🏆 礼物排名</h2>
+  <div id="ranking-list"></div>
+  <button id="clearRankingsButton">🗑️ 清空排名</button>
+</div>
+
 <script>
+  // 创建雪花动画
   function createSnowflake() {
     const snowflake = document.createElement('div');
     snowflake.classList.add('snowflake');
@@ -87,13 +146,15 @@
     setTimeout(() => snowflake.remove(), 5000);
   }
   setInterval(createSnowflake, 200);
-</script>
 
-<script src="/socket.io/socket.io.js"></script>
-<script>
   const socket = io();
   const list = document.getElementById('requests');
-  const clearButton = document.getElementById('clearButton');
+  const clearSongListButton = document.getElementById('clearSongListButton');
+  const giftArea = document.getElementById('gift-area');
+  const rankingList = document.getElementById('ranking-list');
+
+  let gifts = []; // 存储实时礼物信息
+  let rankings = {}; // 存储排名
 
   function addRequestToList(request) {
     const li = document.createElement('li');
@@ -103,26 +164,51 @@
     window.scrollTo(0, document.body.scrollHeight);
   }
 
-  // 请求已有列表
+  // 更新礼物
+  function updateGift(gift) {
+    const giftElement = document.createElement('div');
+    giftElement.classList.add('gift');
+    giftElement.textContent = `${gift.user} 送来了 ${gift.giftName}`;
+    giftArea.appendChild(giftElement);
+    setTimeout(() => giftElement.remove(), 1500);
+  }
+
+  // 更新排名
+  function updateRanking(gift) {
+    if (!rankings[gift.user]) {
+      rankings[gift.user] = 0;
+    }
+    rankings[gift.user] += gift.value;
+
+    const rankingDiv = document.createElement('div');
+    rankingDiv.classList.add('ranking');
+    rankingDiv.textContent = `${gift.user}: ${rankings[gift.user]}`;
+    rankingList.appendChild(rankingDiv);
+    setTimeout(() => rankingDiv.classList.add('rank-up'), 100);
+
+    setTimeout(() => rankingDiv.classList.remove('rank-up'), 1000);
+  }
+
+  // 请求现有的点歌列表
   socket.emit('request_existing', 'nxuan0702');
 
-  // 接收初始化列表
-  socket.on('existing_song_requests_2', (requests) => {
+  socket.on('existing_song_requests', (requests) => {
     requests.forEach(addRequestToList);
   });
 
-  // 接收新的实时请求
+  // 监听新的点歌请求
   socket.on('song_request_nxuan0702', (data) => {
     addRequestToList(data);
   });
 
-  // 监听清空
-  socket.on('clear_song_requests_nxuan0702', () => {
-    list.innerHTML = '';
+  // 监听礼物事件
+  socket.on('gift_received_nxuan0702', (gift) => {
+    updateGift(gift);
+    updateRanking(gift);
   });
 
-  // 清空按钮
-  clearButton.addEventListener('click', () => {
+  // 清空点歌列表
+  clearSongListButton.addEventListener('click', () => {
     if (confirm('确定要清空点歌列表吗？')) {
       fetch('/clear-requests-nxuan0702', { method: 'POST' })
         .then(res => res.json())
@@ -139,6 +225,17 @@
           alert('网络错误，清空失败！');
         });
     }
+  });
+
+  // 清空礼物
+  document.getElementById('clearGiftsButton').addEventListener('click', () => {
+    giftArea.innerHTML = '';
+  });
+
+  // 清空排名
+  document.getElementById('clearRankingsButton').addEventListener('click', () => {
+    rankings = {};
+    rankingList.innerHTML = '';
   });
 </script>
 
