@@ -2,30 +2,30 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>精灵直播后台</title>
+  <title>精灵直播间后台</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body {
       font-family: Arial, sans-serif;
       background-color: #1e1e1e;
       color: #f5f5f5;
-      overflow-x: hidden;
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
 
     h1 {
       text-align: center;
       font-size: 32px;
-      margin-bottom: 30px;
+      margin: 30px 0 20px;
     }
 
     .container {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       gap: 20px;
       max-width: 1200px;
-      margin: 0 auto;
+      margin: 0 auto 40px;
+      padding: 0 20px;
     }
 
     .section {
@@ -39,6 +39,7 @@
     h2 {
       text-align: center;
       margin-bottom: 10px;
+      font-size: 20px;
     }
 
     ul {
@@ -92,7 +93,7 @@
 </head>
 <body>
 
-<h1>🎶 精灵直播间点歌</h1>
+<h1>精灵直播间后台</h1>
 
 <div class="container">
   <!-- 点歌列表 -->
@@ -102,7 +103,7 @@
     <ul id="requests"></ul>
   </div>
 
-  <!-- 礼物实时展示（保留内容直到清空） -->
+  <!-- 礼物实时展示 -->
   <div class="section">
     <h2>🎁 礼物实时展示</h2>
     <button id="clearGiftsButton">🗑️ 清空礼物</button>
@@ -134,7 +135,6 @@
 
   function updateGift(gift) {
     const div = document.createElement('div');
-    div.classList.add('gift');
     div.textContent = `${gift.user} 送来了 ${gift.giftName || gift.gift}`;
     giftArea.appendChild(div);
   }
@@ -166,9 +166,7 @@
     fetch('/clear-requests-nxuan0702', { method: 'POST' })
       .then(res => res.json())
       .then(result => {
-        if (result.success) {
-          list.innerHTML = '';
-        }
+        if (result.success) list.innerHTML = '';
       });
   });
 
