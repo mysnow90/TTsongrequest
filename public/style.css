@@ -6,17 +6,15 @@ body {
   margin: 0;
   padding: 20px;
   overflow-x: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
 }
 
-/* 主容器布局 */
+/* 主容器布局（三栏） */
 .container {
   display: flex;
   justify-content: space-between;
   width: 100%;
   max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* 每个模块盒子 */
@@ -29,21 +27,23 @@ body {
   box-shadow: 0 1px 3px rgba(255, 255, 255, 0.1);
 }
 
-/* 标题样式 */
+/* 页面标题（第一排） */
 h1 {
   color: #ffffff;
   font-size: 28px;
   text-align: center;
-  margin-bottom: 20px;
+  margin: 0 0 30px;
 }
 
+/* 模块小标题 */
 h2 {
   color: #ffffff;
   font-size: 22px;
   margin-bottom: 15px;
+  text-align: center;
 }
 
-/* 列表基础样式 */
+/* 列表样式 */
 ul {
   list-style: none;
   padding: 0;
@@ -110,7 +110,7 @@ button:hover {
   }
 }
 
-/* 排名动画效果（可配合JS添加 rank-up class） */
+/* 排名项样式 */
 .ranking {
   background: #444;
   padding: 8px 12px;
@@ -122,22 +122,6 @@ button:hover {
 .ranking.rank-up {
   background: #5a5aff;
   transform: scale(1.05);
-}
-
-/* 飘雪特效基础样式 */
-.snowflake {
-  position: fixed;
-  top: -10px;
-  color: white;
-  font-size: 1.2em;
-  animation: fall linear infinite;
-  opacity: 0.8;
-  z-index: 9999;
-}
-
-@keyframes fall {
-  0% { transform: translateY(0) rotate(0deg); }
-  100% { transform: translateY(100vh) rotate(360deg); }
 }
 
 /* 排名前三的特殊样式 */
@@ -158,4 +142,20 @@ button:hover {
   border: 2px solid #cd7f32;
   background: linear-gradient(to right, #ffcc99, #cd7f32);
   color: #000;
+}
+
+/* 飘雪特效 */
+.snowflake {
+  position: fixed;
+  top: -10px;
+  color: white;
+  font-size: 1.2em;
+  animation: fall linear infinite;
+  opacity: 0.8;
+  z-index: 9999;
+}
+
+@keyframes fall {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(100vh) rotate(360deg); }
 }
