@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>小嗳直播间点歌</title>
+  <title>小嗳直播间后台</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body {
@@ -10,213 +10,177 @@
       background-color: #1e1e1e;
       color: #f5f5f5;
       overflow-x: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      margin: 0;
       padding: 20px;
     }
+
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 30px;
+    }
+
     .container {
       display: flex;
       justify-content: space-between;
-      width: 100%;
+      gap: 20px;
       max-width: 1200px;
+      margin: 0 auto;
     }
+
     .section {
-      width: 30%;
-      margin: 0 10px;
+      flex: 1;
+      background: #2e2e2e;
       padding: 15px;
-      background-color: #2e2e2e;
       border-radius: 10px;
       box-shadow: 0 1px 3px rgba(255, 255, 255, 0.1);
     }
-    h1 {
-      color: #ffffff;
-      font-size: 28px;
+
+    h2 {
       text-align: center;
+      margin-bottom: 10px;
     }
+
     ul {
       list-style: none;
       padding: 0;
     }
+
     li {
-      background: #333333;
+      background: #333;
       margin: 5px 0;
-      padding: 10px 15px;
+      padding: 10px;
       border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(255, 255, 255, 0.05);
-      transition: background 0.3s;
-    }
-    li:hover {
-      background: #444444;
-    }
-    button {
-      background: #ff4b4b;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-      font-size: 16px;
-      margin-bottom: 20px;
-    }
-    button:hover {
-      background: #e63a3a;
     }
 
-    /* Top 3 排名样式 */
+    button {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background-color: #ff4b4b;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #e63a3a;
+    }
+
     .ranking.top-1 {
       border: 2px solid gold;
       background: linear-gradient(to right, #ffe600, #ffd700);
       color: #000;
       font-weight: bold;
     }
+
     .ranking.top-2 {
       border: 2px solid silver;
       background: linear-gradient(to right, #e0e0e0, #c0c0c0);
       color: #000;
     }
+
     .ranking.top-3 {
       border: 2px solid #cd7f32;
       background: linear-gradient(to right, #ffcc99, #cd7f32);
       color: #000;
     }
-
-    /* 雪花效果 */
-    .snowflake {
-      position: fixed;
-      top: -10px;
-      color: white;
-      font-size: 1.2em;
-      animation: fall linear infinite;
-      opacity: 0.8;
-      z-index: 9999;
-    }
-    @keyframes fall {
-      0% { transform: translateY(0) rotate(0deg); }
-      100% { transform: translateY(100vh) rotate(360deg); }
-    }
   </style>
 </head>
 <body>
-  <h1>🎶 小嗳直播间点歌</h1>
-  <div class="container">
-    <!-- 点歌列表 -->
-    <div class="section">
-      <h2>🎵 点歌列表</h2>
-      <button id="clearSongListButton">🗑️ 清空点歌列表</button>
-      <ul id="requests"></ul>
-    </div>
 
-    <!-- 礼物实时 -->
-    <div class="section">
-      <h2>🎁 礼物实时展示</h2>
-      <button id="clearGiftsButton">🗑️ 清空礼物</button>
-      <div id="gift-area"></div>
-    </div>
+<h1>🎶 小嗳直播间点歌</h1>
 
-    <!-- 礼物排名 -->
-    <div class="section">
-      <h2>🏆 排名</h2>
-      <button id="clearRankingsButton">🗑️ 清空排名</button>
-      <div id="ranking-list"></div>
-    </div>
+<div class="container">
+  <!-- 点歌列表 -->
+  <div class="section">
+    <h2>🎵 点歌列表</h2>
+    <button id="clearSongListButton">🗑️ 清空点歌列表</button>
+    <ul id="requests"></ul>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    // ❄ 飘雪效果
-    const snowContainer = document.createElement('div');
-    document.body.appendChild(snowContainer);
+  <!-- 礼物实时展示（保留内容直到点击清空） -->
+  <div class="section">
+    <h2>🎁 礼物实时展示</h2>
+    <button id="clearGiftsButton">🗑️ 清空礼物</button>
+    <div id="gift-area"></div>
+  </div>
 
-    function createSnowflake() {
-      const flake = document.createElement('div');
-      flake.classList.add('snowflake');
-      flake.textContent = '❄';
-      flake.style.left = Math.random() * 100 + 'vw';
-      flake.style.animationDuration = (Math.random() * 3 + 2) + 's';
-      flake.style.fontSize = (Math.random() * 10 + 10) + 'px';
-      snowContainer.appendChild(flake);
-      setTimeout(() => flake.remove(), 8000);
-    }
+  <!-- 排名 -->
+  <div class="section">
+    <h2>🏆 排名</h2>
+    <button id="clearRankingsButton">🗑️ 清空排名</button>
+    <div id="ranking-list"></div>
+  </div>
+</div>
 
-    setInterval(createSnowflake, 120);
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  const list = document.getElementById('requests');
+  const giftArea = document.getElementById('gift-area');
+  const rankingList = document.getElementById('ranking-list');
+  let rankings = {};
 
-    // 🎵 点歌 socket
-    const socket = io();
-    const list = document.getElementById('requests');
+  socket.on('song_request_euniceaiii', data => {
+    const li = document.createElement('li');
+    const time = data.time || new Date().toLocaleTimeString();
+    li.textContent = `[${time}] ${data.user}: ${data.song}`;
+    list.appendChild(li);
+  });
 
-    socket.on('song_request_euniceaiii', data => {
-      const li = document.createElement('li');
-      const time = data.time || new Date().toLocaleTimeString();
-      li.textContent = `[${time}] ${data.user}: ${data.song}`;
-      list.appendChild(li);
-      window.scrollTo(0, document.body.scrollHeight);
+  function updateGift(gift) {
+    const div = document.createElement('div');
+    div.classList.add('gift');
+    div.textContent = `${gift.user} 送来了 ${gift.giftName || gift.gift}`;
+    giftArea.appendChild(div);
+  }
+
+  function updateRanking(gift) {
+    const value = gift.value || gift.count || gift.giftCount || 1;
+    if (!rankings[gift.user]) rankings[gift.user] = 0;
+    rankings[gift.user] += value;
+
+    const sorted = Object.entries(rankings).sort((a, b) => b[1] - a[1]);
+    rankingList.innerHTML = '';
+    sorted.forEach(([user, total], index) => {
+      const div = document.createElement('div');
+      div.classList.add('ranking');
+      div.textContent = `${user}: ${total}`;
+      if (index === 0) div.classList.add('top-1');
+      else if (index === 1) div.classList.add('top-2');
+      else if (index === 2) div.classList.add('top-3');
+      rankingList.appendChild(div);
     });
+  }
 
-    // 🎁 礼物处理
-    const giftArea = document.getElementById('gift-area');
-    const rankingList = document.getElementById('ranking-list');
-    let rankings = {};
+  socket.on('gift_ranking', gift => {
+    updateGift(gift);
+    updateRanking(gift);
+  });
 
-    function updateGift(gift) {
-      const giftElement = document.createElement('div');
-      giftElement.classList.add('gift');
-      giftElement.textContent = `${gift.user} 送来了 ${gift.giftName || gift.gift}`;
-      giftArea.appendChild(giftElement);
-      setTimeout(() => giftElement.remove(), 1300);
-    }
-
-    function updateRanking(gift) {
-      const value = gift.value || gift.count || gift.giftCount || 1;
-      if (!rankings[gift.user]) rankings[gift.user] = 0;
-      rankings[gift.user] += value;
-
-      const sorted = Object.entries(rankings).sort((a, b) => b[1] - a[1]);
-      rankingList.innerHTML = '';
-      sorted.forEach(([user, total], index) => {
-        const div = document.createElement('div');
-        div.classList.add('ranking');
-        div.textContent = `${user}: ${total}`;
-        if (index === 0) div.classList.add('top-1');
-        else if (index === 1) div.classList.add('top-2');
-        else if (index === 2) div.classList.add('top-3');
-        rankingList.appendChild(div);
+  document.getElementById('clearSongListButton').addEventListener('click', () => {
+    fetch('/clear-requests-euniceaiii', { method: 'POST' })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          list.innerHTML = '';
+        }
       });
-    }
+  });
 
-    socket.on('gift_ranking', gift => {
-      updateGift(gift);
-      updateRanking(gift);
-    });
+  document.getElementById('clearGiftsButton').addEventListener('click', () => {
+    giftArea.innerHTML = '';
+  });
 
-    // 🧹 清除按钮
-    document.getElementById('clearSongListButton').addEventListener('click', () => {
-      if (confirm('确定要清空点歌列表吗？')) {
-        fetch('/clear-requests-euniceaiii', { method: 'POST' })
-          .then(res => res.json())
-          .then(result => {
-            if (result.success) {
-              list.innerHTML = '';
-              alert('点歌列表已清空！');
-            } else {
-              alert('清空失败，请检查服务器！');
-            }
-          })
-          .catch(err => {
-            console.error('Error:', err);
-            alert('网络错误，清空失败！');
-          });
-      }
-    });
+  document.getElementById('clearRankingsButton').addEventListener('click', () => {
+    rankings = {};
+    rankingList.innerHTML = '';
+  });
+</script>
 
-    document.getElementById('clearGiftsButton').addEventListener('click', () => {
-      giftArea.innerHTML = '';
-    });
-
-    document.getElementById('clearRankingsButton').addEventListener('click', () => {
-      rankings = {};
-      rankingList.innerHTML = '';
-    });
-  </script>
 </body>
 </html>
