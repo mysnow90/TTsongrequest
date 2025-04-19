@@ -7,45 +7,53 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
       background-color: #1e1e1e;
       color: #f5f5f5;
       overflow-x: hidden;
-      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+    }
+
+    .container {
       display: flex;
       justify-content: space-between;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .section {
+      width: 30%;
+      margin: 0 10px;
+      padding: 15px;
+      background-color: #2e2e2e;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(255, 255, 255, 0.1);
     }
 
     h1 {
       color: #ffffff;
       font-size: 28px;
       text-align: center;
-      width: 100%;
-    }
-
-    .left-section, .center-section, .right-section {
-      flex: 1;
-      margin: 10px;
     }
 
     ul {
       list-style: none;
       padding: 0;
-      max-width: 600px;
-      margin: 0 auto;
     }
 
     li {
-      background: #2e2e2e;
+      background: #333333;
       margin: 5px 0;
       padding: 10px 15px;
       border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(255,255,255,0.05);
+      box-shadow: 0 1px 3px rgba(255, 255, 255, 0.05);
       transition: background 0.3s;
     }
 
     li:hover {
-      background: #3a3a3a;
+      background: #444444;
     }
 
     button {
@@ -63,38 +71,6 @@
       background: #e63a3a;
     }
 
-    /* 礼物动画 */
-    .gift {
-      position: absolute;
-      font-size: 2em;
-      color: #FFD700;
-      animation: giftAnimation 1.5s linear;
-      z-index: 999;
-    }
-
-    @keyframes giftAnimation {
-      0% {
-        transform: translateY(0);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-100px);
-        opacity: 0;
-      }
-    }
-
-    /* 排名动画 */
-    .ranking {
-      font-size: 24px;
-      color: #FFD700;
-      font-weight: bold;
-      transition: transform 0.5s ease-in-out;
-    }
-    .rank-up {
-      transform: translateY(-20px);
-    }
-
-    /* ❄️ Snow effect */
     .snowflake {
       position: fixed;
       top: -10px;
@@ -109,32 +85,55 @@
       0% { transform: translateY(0) rotate(0deg); }
       100% { transform: translateY(100vh) rotate(360deg); }
     }
+
+    .ranking.top-1 {
+      border: 2px solid gold;
+      background: linear-gradient(to right, #ffe600, #ffd700);
+      color: #000;
+      font-weight: bold;
+    }
+    .ranking.top-2 {
+      border: 2px solid silver;
+      background: linear-gradient(to right, #e0e0e0, #c0c0c0);
+      color: #000;
+    }
+    .ranking.top-3 {
+      border: 2px solid #cd7f32;
+      background: linear-gradient(to right, #ffcc99, #cd7f32);
+      color: #000;
+    }
   </style>
 </head>
 <body>
 
 <h1>🎶 精灵直播间点歌</h1>
 
-<div class="left-section">
-  <h2>🎁 礼物实时</h2>
-  <div id="gift-area"></div>
-  <button id="clearGiftsButton">🗑️ 清空礼物</button>
+<div class="container">
+  <!-- Left Section - Song Requests -->
+  <div class="section">
+    <h2>🎵 点歌列表</h2>
+    <button id="clearSongListButton">🗑️ 清空点歌列表</button>
+    <ul id="requests"></ul>
+  </div>
+
+  <!-- Middle Section - Gifts -->
+  <div class="section">
+    <h2>🎁 礼物实时展示</h2>
+    <button id="clearGiftsButton">🗑️ 清空礼物</button>
+    <div id="gift-area"></div>
+  </div>
+
+  <!-- Right Section - Rankings -->
+  <div class="section">
+    <h2>🏆 排名</h2>
+    <button id="clearRankingsButton">🗑️ 清空排名</button>
+    <div id="ranking-list"></div>
+  </div>
 </div>
 
-<div class="center-section">
-  <h2>🎵 点歌列表</h2>
-  <button id="clearSongListButton">🗑️ 清空列表</button>
-  <ul id="requests"></ul>
-</div>
-
-<div class="right-section">
-  <h2>🏆 礼物排名</h2>
-  <div id="ranking-list"></div>
-  <button id="clearRankingsButton">🗑️ 清空排名</button>
-</div>
-
+<script src="/socket.io/socket.io.js"></script>
 <script>
-  // 创建雪花动画
+  // 飘雪
   function createSnowflake() {
     const snowflake = document.createElement('div');
     snowflake.classList.add('snowflake');
@@ -147,68 +146,57 @@
   }
   setInterval(createSnowflake, 200);
 
+  // socket
   const socket = io();
   const list = document.getElementById('requests');
-  const clearSongListButton = document.getElementById('clearSongListButton');
   const giftArea = document.getElementById('gift-area');
   const rankingList = document.getElementById('ranking-list');
+  let rankings = {};
 
-  let gifts = []; // 存储实时礼物信息
-  let rankings = {}; // 存储排名
-
-  function addRequestToList(request) {
+  // 点歌
+  socket.on('song_request_nxuan0702', (data) => {
     const li = document.createElement('li');
-    const time = request.time || new Date().toLocaleTimeString();
-    li.textContent = `[${time}] ${request.user}: ${request.song}`;
+    const time = data.time || new Date().toLocaleTimeString();
+    li.textContent = `[${time}] ${data.user}: ${data.song}`;
     list.appendChild(li);
     window.scrollTo(0, document.body.scrollHeight);
-  }
+  });
 
-  // 更新礼物
+  // 礼物展示
   function updateGift(gift) {
     const giftElement = document.createElement('div');
     giftElement.classList.add('gift');
-    giftElement.textContent = `${gift.user} 送来了 ${gift.giftName}`;
+    giftElement.textContent = `${gift.user} 送来了 ${gift.giftName || gift.gift}`;
     giftArea.appendChild(giftElement);
-    setTimeout(() => giftElement.remove(), 1500);
+    setTimeout(() => giftElement.remove(), 1300);
   }
 
-  // 更新排名
+  // 排名处理（含Top 3样式）
   function updateRanking(gift) {
-    if (!rankings[gift.user]) {
-      rankings[gift.user] = 0;
-    }
-    rankings[gift.user] += gift.value;
+    const value = gift.value || gift.count || gift.giftCount || 1;
+    if (!rankings[gift.user]) rankings[gift.user] = 0;
+    rankings[gift.user] += value;
 
-    const rankingDiv = document.createElement('div');
-    rankingDiv.classList.add('ranking');
-    rankingDiv.textContent = `${gift.user}: ${rankings[gift.user]}`;
-    rankingList.appendChild(rankingDiv);
-    setTimeout(() => rankingDiv.classList.add('rank-up'), 100);
-
-    setTimeout(() => rankingDiv.classList.remove('rank-up'), 1000);
+    const sorted = Object.entries(rankings).sort((a, b) => b[1] - a[1]);
+    rankingList.innerHTML = '';
+    sorted.forEach(([user, total], index) => {
+      const div = document.createElement('div');
+      div.classList.add('ranking');
+      div.textContent = `${user}: ${total}`;
+      if (index === 0) div.classList.add('top-1');
+      else if (index === 1) div.classList.add('top-2');
+      else if (index === 2) div.classList.add('top-3');
+      rankingList.appendChild(div);
+    });
   }
 
-  // 请求现有的点歌列表
-  socket.emit('request_existing', 'nxuan0702');
-
-  socket.on('existing_song_requests', (requests) => {
-    requests.forEach(addRequestToList);
-  });
-
-  // 监听新的点歌请求
-  socket.on('song_request_nxuan0702', (data) => {
-    addRequestToList(data);
-  });
-
-  // 监听礼物事件
-  socket.on('gift_received_nxuan0702', (gift) => {
+  socket.on('gift_ranking_2', (gift) => {
     updateGift(gift);
     updateRanking(gift);
   });
 
-  // 清空点歌列表
-  clearSongListButton.addEventListener('click', () => {
+  // 清除按钮
+  document.getElementById('clearSongListButton').addEventListener('click', () => {
     if (confirm('确定要清空点歌列表吗？')) {
       fetch('/clear-requests-nxuan0702', { method: 'POST' })
         .then(res => res.json())
@@ -227,12 +215,10 @@
     }
   });
 
-  // 清空礼物
   document.getElementById('clearGiftsButton').addEventListener('click', () => {
     giftArea.innerHTML = '';
   });
 
-  // 清空排名
   document.getElementById('clearRankingsButton').addEventListener('click', () => {
     rankings = {};
     rankingList.innerHTML = '';

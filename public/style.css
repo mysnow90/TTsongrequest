@@ -1,47 +1,68 @@
-/* 全局样式 */
+/* 通用背景与字体设置 */
 body {
   font-family: Arial, sans-serif;
-  padding: 20px;
   background-color: #1e1e1e;
   color: #f5f5f5;
+  margin: 0;
+  padding: 20px;
   overflow-x: hidden;
-  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
+/* 主容器布局 */
+.container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* 每个模块盒子 */
+.section {
+  width: 30%;
+  margin: 0 10px;
+  padding: 15px;
+  background-color: #2e2e2e;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(255, 255, 255, 0.1);
+}
+
+/* 标题样式 */
 h1 {
   color: #ffffff;
   font-size: 28px;
   text-align: center;
+  margin-bottom: 20px;
 }
 
-/* 主页样式 */
-.photo-container {
-  display: flex;
-  justify-content: center;
-  gap: 50px;
-  margin-top: 50px;
+h2 {
+  color: #ffffff;
+  font-size: 22px;
+  margin-bottom: 15px;
 }
 
-.photo {
-  width: 300px;
-  height: 300px;
-  border-radius: 10px;
-  overflow: hidden;
-  position: relative;
-  cursor: pointer;
-  transition: filter 0.3s ease;
+/* 列表基础样式 */
+ul {
+  list-style: none;
+  padding: 0;
 }
 
-.photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+li {
+  background: #333333;
+  margin: 5px 0;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(255, 255, 255, 0.05);
+  transition: background 0.3s ease;
 }
 
-.photo:hover {
-  filter: blur(5px);
+li:hover {
+  background: #444444;
 }
 
+/* 按钮样式 */
 button {
   background: #ff4b4b;
   border: none;
@@ -50,25 +71,91 @@ button {
   color: white;
   cursor: pointer;
   font-size: 16px;
+  margin-bottom: 20px;
+  transition: background 0.3s ease;
 }
 
 button:hover {
   background: #e63a3a;
 }
 
-/* 礼物排行榜样式 */
-#giftRankings {
-  margin-top: 20px;
-  padding: 10px;
-  background-color: #333;
-  border-radius: 10px;
+/* 礼物动画显示样式 */
+.gift {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin: 5px 0;
+  color: #ffe600;
+  font-weight: bold;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: giftFlyZoom 1.2s ease-out forwards;
 }
 
-.gift-item {
-  background-color: #2e2e2e;
-  padding: 10px;
+/* 动画：飞入+缩放+旋转+淡出 */
+@keyframes giftFlyZoom {
+  0% {
+    transform: scale(0.5) translateY(30px) rotate(-10deg);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.2) translateY(0) rotate(5deg);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1) rotate(0deg);
+  }
+  100% {
+    transform: scale(0.9) translateY(-10px);
+    opacity: 0;
+  }
+}
+
+/* 排名动画效果（可配合JS添加 rank-up class） */
+.ranking {
+  background: #444;
+  padding: 8px 12px;
+  border-radius: 6px;
   margin: 5px 0;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(255, 255, 255, 0.05);
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.ranking.rank-up {
+  background: #5a5aff;
+  transform: scale(1.05);
+}
+
+/* 飘雪特效基础样式 */
+.snowflake {
+  position: fixed;
+  top: -10px;
   color: white;
+  font-size: 1.2em;
+  animation: fall linear infinite;
+  opacity: 0.8;
+  z-index: 9999;
+}
+
+@keyframes fall {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(100vh) rotate(360deg); }
+}
+
+/* 排名前三的特殊样式 */
+.ranking.top-1 {
+  border: 2px solid gold;
+  background: linear-gradient(to right, #ffe600, #ffd700);
+  color: #000;
+  font-weight: bold;
+}
+
+.ranking.top-2 {
+  border: 2px solid silver;
+  background: linear-gradient(to right, #e0e0e0, #c0c0c0);
+  color: #000;
+}
+
+.ranking.top-3 {
+  border: 2px solid #cd7f32;
+  background: linear-gradient(to right, #ffcc99, #cd7f32);
+  color: #000;
 }

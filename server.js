@@ -11,7 +11,7 @@ const io = new Server(server);
 
 // TikTok usernames
 const tiktokUsername1 = "euniceaiii";
-const tiktokUsername2 = "n.xuan0702";
+const tiktokUsername2 = "n.xuan0702"; // 精灵's username
 
 // File paths for each TikToker's song requests and gift records
 const songRequestsFile1 = path.join(__dirname, 'songRequests1.json');
@@ -20,18 +20,10 @@ const giftRecordsFile1 = path.join(__dirname, 'giftRecords1.json');
 const giftRecordsFile2 = path.join(__dirname, 'giftRecords2.json');
 
 // Ensure JSON files exist
-if (!fs.existsSync(songRequestsFile1)) {
-  fs.writeFileSync(songRequestsFile1, JSON.stringify([]));
-}
-if (!fs.existsSync(songRequestsFile2)) {
-  fs.writeFileSync(songRequestsFile2, JSON.stringify([]));
-}
-if (!fs.existsSync(giftRecordsFile1)) {
-  fs.writeFileSync(giftRecordsFile1, JSON.stringify([]));
-}
-if (!fs.existsSync(giftRecordsFile2)) {
-  fs.writeFileSync(giftRecordsFile2, JSON.stringify([]));
-}
+if (!fs.existsSync(songRequestsFile1)) fs.writeFileSync(songRequestsFile1, JSON.stringify([]));
+if (!fs.existsSync(songRequestsFile2)) fs.writeFileSync(songRequestsFile2, JSON.stringify([]));
+if (!fs.existsSync(giftRecordsFile1)) fs.writeFileSync(giftRecordsFile1, JSON.stringify([]));
+if (!fs.existsSync(giftRecordsFile2)) fs.writeFileSync(giftRecordsFile2, JSON.stringify([]));
 
 // Middleware to serve static files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -43,6 +35,10 @@ app.get('/', (req, res) => {
 
 app.get('/euniceaiii', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/euniceaiii.html'));
+});
+
+app.get('/nxuan0702', (req, res) => {  // 精灵's 页面
+  res.sendFile(path.join(__dirname, 'public/nxuan0702.html'));
 });
 
 // Handle WebSocket connections
@@ -71,7 +67,7 @@ io.on('connection', socket => {
           }
         }
       });
-    } else if (who === 'nxuan0702') {
+    } else if (who === 'n.xuan0702') {  // 精灵的处理
       fs.readFile(songRequestsFile2, 'utf8', (err, data) => {
         if (!err) {
           try {
@@ -95,7 +91,7 @@ io.on('connection', socket => {
     }
   });
 
-  // Function to connect to TikTok Live
+  // Connect to TikTok live
   function connectToTikTok(username, songFile, giftFile, socketEventName, socketGiftEventName) {
     const tiktokConnection = new WebcastPushConnection(username);
 
@@ -112,11 +108,10 @@ io.on('connection', socket => {
 
       io.emit('chat_message', { user, message: comment });
 
-      // Match #songname or ＃songname including space after
       const matches = comment.match(/[＃#][^＃#]+/g);
       if (matches) {
         matches.forEach(match => {
-          const song = match.substring(1).trim(); // remove # and trim
+          const song = match.substring(1).trim();
 
           const newRequest = {
             user,
@@ -159,7 +154,6 @@ io.on('connection', socket => {
 
       console.log(`[${username}] Gift: ${giftName} from ${user} x${giftCount}`);
 
-      // Update gift records in the file
       fs.readFile(giftFile, 'utf8', (err, fileData) => {
         let giftRecords = [];
         if (!err) {
@@ -172,12 +166,12 @@ io.on('connection', socket => {
 
         const existingUser = giftRecords.find(entry => entry.user === user);
         if (existingUser) {
-          existingUser.count += giftCount; // Increase the existing count
+          existingUser.count += giftCount;
         } else {
           giftRecords.push(newGift);
         }
 
-        giftRecords.sort((a, b) => b.count - a.count); // Sort by count descending
+        giftRecords.sort((a, b) => b.count - a.count);
 
         fs.writeFile(giftFile, JSON.stringify(giftRecords, null, 2), writeErr => {
           if (writeErr) {
@@ -199,16 +193,14 @@ io.on('connection', socket => {
     });
   }
 
-  // Connect both TikTokers separately
+  // Connect both TikTokers
   connectToTikTok(tiktokUsername1, songRequestsFile1, giftRecordsFile1, 'song_request_euniceaiii', 'gift_ranking');
   connectToTikTok(tiktokUsername2, songRequestsFile2, giftRecordsFile2, 'song_request_nxuan0702', 'gift_ranking_2');
 
-  // Clear song requests and gift records
+  // 清理 euniceaiii 的数据
   app.post('/clear-requests-euniceaiii', (req, res) => {
     fs.writeFile(songRequestsFile1, JSON.stringify([]), err => {
-      if (err) {
-        return res.status(500).json({ success: false, message: 'Error clearing song requests.' });
-      }
+      if (err) return res.status(500).json({ success: false, message: 'Error clearing song requests.' });
       io.emit('clear_song_requests_euniceaiii');
       res.json({ success: true });
     });
@@ -216,17 +208,31 @@ io.on('connection', socket => {
 
   app.post('/clear-gifts-euniceaiii', (req, res) => {
     fs.writeFile(giftRecordsFile1, JSON.stringify([]), err => {
-      if (err) {
-        return res.status(500).json({ success: false, message: 'Error clearing gift records.' });
-      }
+      if (err) return res.status(500).json({ success: false, message: 'Error clearing gift records.' });
       io.emit('clear_gift_ranking');
       res.json({ success: true });
     });
   });
 
+  // 清理 n.xuan0702 的数据
+  app.post('/clear-requests-nxuan0702', (req, res) => {
+    fs.writeFile(songRequestsFile2, JSON.stringify([]), err => {
+      if (err) return res.status(500).json({ success: false, message: 'Error clearing song requests.' });
+      io.emit('clear_song_requests_nxuan0702');
+      res.json({ success: true });
+    });
+  });
+
+  app.post('/clear-gifts-nxuan0702', (req, res) => {
+    fs.writeFile(giftRecordsFile2, JSON.stringify([]), err => {
+      if (err) return res.status(500).json({ success: false, message: 'Error clearing gift records.' });
+      io.emit('clear_gift_ranking_2');
+      res.json({ success: true });
+    });
+  });
 });
 
-// Start server
+// 启动服务器
 server.listen(3000, () => {
   console.log('Server running at http://localhost:3000');
 });
