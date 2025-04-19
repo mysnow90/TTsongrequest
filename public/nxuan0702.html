@@ -19,8 +19,9 @@
       margin: 30px 0 20px;
     }
 
-    .container {
+    main.container {
       display: flex;
+      flex-direction: row;
       justify-content: center;
       gap: 20px;
       max-width: 1200px;
@@ -108,30 +109,29 @@
 </head>
 <body>
 
-<h1>精灵直播间后台</h1>
+<header>
+  <h1>精灵直播间后台</h1>
+</header>
 
-<div class="container">
-  <!-- 点歌列表 -->
+<main class="container">
   <div class="section">
     <h2>🎵 点歌列表</h2>
     <button id="clearSongListButton">🗑️ 清空点歌列表</button>
     <ul id="requests"></ul>
   </div>
 
-  <!-- 礼物实时展示 -->
   <div class="section">
     <h2>🎁 礼物实时展示</h2>
     <button id="clearGiftsButton">🗑️ 清空礼物</button>
     <div id="gift-area"></div>
   </div>
 
-  <!-- 排名 -->
   <div class="section">
     <h2>🏆 排名</h2>
     <button id="clearRankingsButton">🗑️ 清空排名</button>
     <div id="ranking-list"></div>
   </div>
-</div>
+</main>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
