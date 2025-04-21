@@ -1,161 +1,45 @@
-/* 通用背景与字体设置 */
+/* Add any additional styles for your landing page */
 body {
   font-family: Arial, sans-serif;
   background-color: #1e1e1e;
   color: #f5f5f5;
-  margin: 0;
-  padding: 20px;
-  overflow-x: hidden;
 }
 
-/* 主容器布局（三栏） */
-.container {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-/* 每个模块盒子 */
-.section {
-  width: 30%;
-  margin: 0 10px;
-  padding: 15px;
-  background-color: #2e2e2e;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(255, 255, 255, 0.1);
-}
-
-/* 页面标题（第一排） */
 h1 {
   color: #ffffff;
   font-size: 28px;
   text-align: center;
-  margin: 0 0 30px;
+  margin-top: 50px;
 }
 
-/* 模块小标题 */
-h2 {
-  color: #ffffff;
-  font-size: 22px;
-  margin-bottom: 15px;
-  text-align: center;
+.tiktoker-frame {
+  display: inline-block;
+  margin: 20px;
+  position: relative;
+  width: 300px;
+  height: 300px;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* 列表样式 */
-ul {
-  list-style: none;
-  padding: 0;
+.tiktoker-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-li {
-  background: #333333;
-  margin: 5px 0;
-  padding: 10px 15px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(255, 255, 255, 0.05);
-  transition: background 0.3s ease;
-}
-
-li:hover {
-  background: #444444;
-}
-
-/* 按钮样式 */
-button {
-  background: #ff4b4b;
-  border: none;
+.choose-button {
+  font-size: 20px;
+  background-color: #ff4b4b;
+  color: white;
   padding: 10px 20px;
+  border: none;
   border-radius: 8px;
-  color: white;
   cursor: pointer;
-  font-size: 16px;
-  margin-bottom: 20px;
-  transition: background 0.3s ease;
+  margin-top: 20px;
 }
 
-button:hover {
-  background: #e63a3a;
-}
-
-/* 礼物动画显示样式 */
-.gift {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 10px 15px;
-  border-radius: 8px;
-  margin: 5px 0;
-  color: #ffe600;
-  font-weight: bold;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  animation: giftFlyZoom 1.2s ease-out forwards;
-}
-
-/* 动画：飞入+缩放+旋转+淡出 */
-@keyframes giftFlyZoom {
-  0% {
-    transform: scale(0.5) translateY(30px) rotate(-10deg);
-    opacity: 0;
-  }
-  40% {
-    transform: scale(1.2) translateY(0) rotate(5deg);
-    opacity: 1;
-  }
-  70% {
-    transform: scale(1) rotate(0deg);
-  }
-  100% {
-    transform: scale(0.9) translateY(-10px);
-    opacity: 0;
-  }
-}
-
-/* 排名项样式 */
-.ranking {
-  background: #444;
-  padding: 8px 12px;
-  border-radius: 6px;
-  margin: 5px 0;
-  transition: transform 0.3s ease, background 0.3s ease;
-}
-
-.ranking.rank-up {
-  background: #5a5aff;
-  transform: scale(1.05);
-}
-
-/* 排名前三的特殊样式 */
-.ranking.top-1 {
-  border: 2px solid gold;
-  background: linear-gradient(to right, #ffe600, #ffd700);
-  color: #000;
-  font-weight: bold;
-}
-
-.ranking.top-2 {
-  border: 2px solid silver;
-  background: linear-gradient(to right, #e0e0e0, #c0c0c0);
-  color: #000;
-}
-
-.ranking.top-3 {
-  border: 2px solid #cd7f32;
-  background: linear-gradient(to right, #ffcc99, #cd7f32);
-  color: #000;
-}
-
-/* 飘雪特效 */
-.snowflake {
-  position: fixed;
-  top: -10px;
-  color: white;
-  font-size: 1.2em;
-  animation: fall linear infinite;
-  opacity: 0.8;
-  z-index: 9999;
-}
-
-@keyframes fall {
-  0% { transform: translateY(0) rotate(0deg); }
-  100% { transform: translateY(100vh) rotate(360deg); }
+.choose-button:hover {
+  background-color: #e63a3a;
 }

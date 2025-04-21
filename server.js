@@ -11,35 +11,37 @@ const io = new Server(server);
 
 // TikTok usernames
 const tiktokUsername1 = "euniceaiii";
-const tiktokUsername2 = "n.xuan0702"; // 精灵's username
+const tiktokUsername2 = "n.xuan0702";
 
-// File paths for each TikToker
+// File paths for each TikToker's song requests
 const songRequestsFile1 = path.join(__dirname, 'songRequests1.json');
 const songRequestsFile2 = path.join(__dirname, 'songRequests2.json');
-const giftRecordsFile1 = path.join(__dirname, 'giftRecords1.json');
-const giftRecordsFile2 = path.join(__dirname, 'giftRecords2.json');
 
 // Ensure JSON files exist
-const ensureFile = (filePath) => {
-  if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, JSON.stringify([]));
-};
-[ songRequestsFile1, songRequestsFile2, giftRecordsFile1, giftRecordsFile2 ].forEach(ensureFile);
+if (!fs.existsSync(songRequestsFile1)) {
+  fs.writeFileSync(songRequestsFile1, JSON.stringify([]));
+}
+if (!fs.existsSync(songRequestsFile2)) {
+  fs.writeFileSync(songRequestsFile2, JSON.stringify([]));
+}
 
-// Middleware
+// Middleware to serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
+
 app.get('/euniceaiii', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/euniceaiii.html'));
-});
-app.get('/nxuan0702', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/nxuan0702.html'));
+  res.sendFile(path.join(__dirname, 'euniceaiii.html'));
 });
 
-// WebSocket connection
+app.get('/nxuan0702', (req, res) => {
+  res.sendFile(path.join(__dirname, 'nxuan0702.html'));
+});
+
+// Handle WebSocket connections
 io.on('connection', socket => {
   console.log('A user connected.');
 
@@ -48,45 +50,37 @@ io.on('connection', socket => {
       fs.readFile(songRequestsFile1, 'utf8', (err, data) => {
         if (!err) {
           try {
-            socket.emit('existing_song_requests', JSON.parse(data));
-          } catch (e) { console.error("Error parsing songRequests1:", e); }
+            const songRequests = JSON.parse(data);
+            socket.emit('existing_song_requests', songRequests);
+          } catch (parseError) {
+            console.error("Error parsing songRequests1.json:", parseError);
+          }
         }
       });
-      fs.readFile(giftRecordsFile1, 'utf8', (err, data) => {
-        if (!err) {
-          try {
-            socket.emit('gift_ranking', JSON.parse(data));
-          } catch (e) { console.error("Error parsing giftRecords1:", e); }
-        }
-      });
-    } else if (who === 'n.xuan0702') {
+    } else if (who === 'nxuan0702') {
       fs.readFile(songRequestsFile2, 'utf8', (err, data) => {
         if (!err) {
           try {
-            socket.emit('existing_song_requests_2', JSON.parse(data));
-          } catch (e) { console.error("Error parsing songRequests2:", e); }
-        }
-      });
-      fs.readFile(giftRecordsFile2, 'utf8', (err, data) => {
-        if (!err) {
-          try {
-            socket.emit('gift_ranking_2', JSON.parse(data));
-          } catch (e) { console.error("Error parsing giftRecords2:", e); }
+            const songRequests = JSON.parse(data);
+            socket.emit('existing_song_requests_2', songRequests);
+          } catch (parseError) {
+            console.error("Error parsing songRequests2.json:", parseError);
+          }
         }
       });
     }
   });
 });
 
-// Function to connect and listen to TikTok
-function connectToTikTok(username, songFile, giftFile, socketEventName, socketGiftEventName) {
+// Function to connect to TikTok Live
+function connectToTikTok(username, file, socketEventName) {
   const tiktokConnection = new WebcastPushConnection(username);
 
   tiktokConnection.connect().then(state => {
     console.log(`Connected to roomId: ${state.roomId} (${username})`);
   }).catch(err => {
     console.error(`Connection failed for ${username}:`, err);
-    setTimeout(() => connectToTikTok(username, songFile, giftFile, socketEventName, socketGiftEventName), 60000);
+    setTimeout(() => connectToTikTok(username, file, socketEventName), 5000);
   });
 
   tiktokConnection.on('chat', data => {
@@ -95,10 +89,12 @@ function connectToTikTok(username, songFile, giftFile, socketEventName, socketGi
 
     io.emit('chat_message', { user, message: comment });
 
+    // Match #songname or ＃songname including space after
     const matches = comment.match(/[＃#][^＃#]+/g);
     if (matches) {
       matches.forEach(match => {
-        const song = match.substring(1).trim();
+        const song = match.substring(1).trim(); // remove # and trim
+
         const newRequest = {
           user,
           song,
@@ -107,14 +103,22 @@ function connectToTikTok(username, songFile, giftFile, socketEventName, socketGi
 
         console.log(`[${username}] Song Request: ${song}`);
 
-        fs.readFile(songFile, 'utf8', (err, fileData) => {
+        fs.readFile(file, 'utf8', (err, fileData) => {
           let songRequests = [];
           if (!err) {
-            try { songRequests = JSON.parse(fileData); } catch (e) { console.error('Parse error:', e); }
+            try {
+              songRequests = JSON.parse(fileData);
+            } catch (parseErr) {
+              console.error('Error parsing file:', parseErr);
+            }
           }
+
           songRequests.push(newRequest);
-          fs.writeFile(songFile, JSON.stringify(songRequests, null, 2), err => {
-            if (err) console.error('Error writing song file:', err);
+
+          fs.writeFile(file, JSON.stringify(songRequests, null, 2), writeErr => {
+            if (writeErr) {
+              console.error('Error writing to file:', writeErr);
+            }
           });
         });
 
@@ -123,58 +127,9 @@ function connectToTikTok(username, songFile, giftFile, socketEventName, socketGi
     }
   });
 
-  tiktokConnection.on('gift', data => {
-    const user = data.nickname;
-    const giftName = data.giftName;
-    const giftCount = data.giftCount;
-    const diamondCount = data.diamondCount || 0;
-    const totalDiamonds = giftCount * diamondCount;
-
-    const newGiftDetail = {
-      gift: giftName,
-      count: giftCount,
-      diamonds: totalDiamonds
-    };
-
-    console.log(`[${username}] Gift: ${giftName} from ${user} x${giftCount} (${totalDiamonds} coins)`);
-
-    fs.readFile(giftFile, 'utf8', (err, fileData) => {
-      let giftRecords = [];
-      if (!err) {
-        try { giftRecords = JSON.parse(fileData); } catch (e) { console.error('Gift file parse error:', e); }
-      }
-
-      let existingUser = giftRecords.find(entry => entry.user === user);
-      if (existingUser) {
-        existingUser.totalDiamonds += totalDiamonds;
-        let existingGift = existingUser.gifts.find(g => g.gift === giftName);
-        if (existingGift) {
-          existingGift.count += giftCount;
-          existingGift.diamonds += totalDiamonds;
-        } else {
-          existingUser.gifts.push(newGiftDetail);
-        }
-      } else {
-        giftRecords.push({
-          user,
-          totalDiamonds: totalDiamonds,
-          gifts: [newGiftDetail]
-        });
-      }
-
-      giftRecords.sort((a, b) => b.totalDiamonds - a.totalDiamonds);
-
-      fs.writeFile(giftFile, JSON.stringify(giftRecords, null, 2), err => {
-        if (err) console.error('Error writing gift file:', err);
-      });
-    });
-
-    io.emit(socketGiftEventName, { user, giftName, giftCount, totalDiamonds });
-  });
-
   tiktokConnection.on('disconnected', () => {
-    console.warn(`Disconnected from ${username}. Reconnecting in 60s...`);
-    setTimeout(() => connectToTikTok(username, songFile, giftFile, socketEventName, socketGiftEventName), 60000);
+    console.warn(`Disconnected from ${username}. Reconnecting in 5s...`);
+    setTimeout(() => connectToTikTok(username, file, socketEventName), 5000);
   });
 
   tiktokConnection.on('error', err => {
@@ -182,42 +137,9 @@ function connectToTikTok(username, songFile, giftFile, socketEventName, socketGi
   });
 }
 
-// Connect both streamers
-connectToTikTok(tiktokUsername1, songRequestsFile1, giftRecordsFile1, 'song_request_euniceaiii', 'gift_ranking');
-connectToTikTok(tiktokUsername2, songRequestsFile2, giftRecordsFile2, 'song_request_nxuan0702', 'gift_ranking_2');
-
-// Clear APIs
-app.post('/clear-requests-euniceaiii', (req, res) => {
-  fs.writeFile(songRequestsFile1, JSON.stringify([]), err => {
-    if (err) return res.status(500).json({ success: false });
-    io.emit('clear_song_requests_euniceaiii');
-    res.json({ success: true });
-  });
-});
-
-app.post('/clear-gifts-euniceaiii', (req, res) => {
-  fs.writeFile(giftRecordsFile1, JSON.stringify([]), err => {
-    if (err) return res.status(500).json({ success: false });
-    io.emit('clear_gift_ranking');
-    res.json({ success: true });
-  });
-});
-
-app.post('/clear-requests-nxuan0702', (req, res) => {
-  fs.writeFile(songRequestsFile2, JSON.stringify([]), err => {
-    if (err) return res.status(500).json({ success: false });
-    io.emit('clear_song_requests_nxuan0702');
-    res.json({ success: true });
-  });
-});
-
-app.post('/clear-gifts-nxuan0702', (req, res) => {
-  fs.writeFile(giftRecordsFile2, JSON.stringify([]), err => {
-    if (err) return res.status(500).json({ success: false });
-    io.emit('clear_gift_ranking_2');
-    res.json({ success: true });
-  });
-});
+// Connect both TikTokers separately
+connectToTikTok(tiktokUsername1, songRequestsFile1, 'song_request_euniceaiii');
+connectToTikTok(tiktokUsername2, songRequestsFile2, 'song_request_nxuan0702');
 
 // Start server
 server.listen(3000, () => {
