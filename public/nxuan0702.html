@@ -122,24 +122,25 @@
   });
 
   // 清空按钮
-  clearButton.addEventListener('click', () => {
-    if (confirm('确定要清空点歌列表吗？')) {
-      fetch('/clear-requests-nxuan0702', { method: 'POST' })
-        .then(res => res.json())
-        .then(result => {
-          if (result.success) {
-            list.innerHTML = '';
-            alert('点歌列表已清空！');
-          } else {
-            alert('清空失败，请检查服务器！');
-          }
-        })
-        .catch(err => {
-          console.error('Error:', err);
-          alert('网络错误，清空失败！');
-        });
-    }
-  });
+ clearButton.addEventListener('click', () => {
+  if (confirm('确定要清空点歌列表吗？')) {
+    fetch('/clear-requests-nxuan0702', { method: 'POST' })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          list.innerHTML = ''; // Clear the song list on the page
+          alert('点歌列表已清空！');
+        } else {
+          alert('清空失败，请检查服务器！');
+        }
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        alert('网络错误，清空失败！');
+      });
+  }
+});
+
 </script>
 
 </body>
