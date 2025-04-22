@@ -141,6 +141,28 @@ function connectToTikTok(username, file, socketEventName) {
 connectToTikTok(tiktokUsername1, songRequestsFile1, 'song_request_euniceaiii');
 connectToTikTok(tiktokUsername2, songRequestsFile2, 'song_request_nxuan0702');
 
+// Clear song requests for euniceaiii
+app.post('/clear-requests-euniceaiii', (req, res) => {
+  fs.writeFile(songRequestsFile1, JSON.stringify([]), (err) => {
+    if (err) {
+      console.error('Error clearing song requests for euniceaiii:', err);
+      return res.status(500).json({ success: false, message: 'Failed to clear song requests' });
+    }
+    res.json({ success: true });
+  });
+});
+
+// Clear song requests for nxuan0702
+app.post('/clear-requests-nxuan0702', (req, res) => {
+  fs.writeFile(songRequestsFile2, JSON.stringify([]), (err) => {
+    if (err) {
+      console.error('Error clearing song requests for nxuan0702:', err);
+      return res.status(500).json({ success: false, message: 'Failed to clear song requests' });
+    }
+    res.json({ success: true });
+  });
+});
+
 // Start server
 server.listen(3000, () => {
   console.log('Server running at http://localhost:3000');
